@@ -1,0 +1,631 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+  
+    <link href='//fonts.lug.ustc.edu.cn/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+  
+
+
+<link rel="stylesheet" type="text/css" href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" />
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.5.2"/>
+
+
+    <meta name="description" content="iOS技术博客" />
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
+
+
+<meta name="description" content="使用MVVM架构来开发APP的好处之一就是便于测试业务逻辑，由于ViewModel不涉及界面，就不用考虑Mock对象了，测试起来也方便的多。
+对ViewModel进行单元测试的一般流程创建ViewModel -&amp;gt; 把输入数据交给ViewModel -&amp;gt; ViewModel把输入数据进行业务逻辑处理，加工成输出数据 -&amp;gt; 测试ViewModel的输出数据是否正确
+进行单元测试前需做">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何对ViewModel进行单元测试">
+<meta property="og:url" content="http://liuduoios.github.io/2015/10/26/如何对ViewModel进行单元测试/index.html">
+<meta property="og:site_name" content="刘铎.Me">
+<meta property="og:description" content="使用MVVM架构来开发APP的好处之一就是便于测试业务逻辑，由于ViewModel不涉及界面，就不用考虑Mock对象了，测试起来也方便的多。
+对ViewModel进行单元测试的一般流程创建ViewModel -&amp;gt; 把输入数据交给ViewModel -&amp;gt; ViewModel把输入数据进行业务逻辑处理，加工成输出数据 -&amp;gt; 测试ViewModel的输出数据是否正确
+进行单元测试前需做">
+<meta property="og:image" content="http://liuduoios.github.io/QQ20151026-1.png">
+<meta property="og:updated_time" content="2015-10-26T14:19:25.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何对ViewModel进行单元测试">
+<meta name="twitter:description" content="使用MVVM架构来开发APP的好处之一就是便于测试业务逻辑，由于ViewModel不涉及界面，就不用考虑Mock对象了，测试起来也方便的多。
+对ViewModel进行单元测试的一般流程创建ViewModel -&amp;gt; 把输入数据交给ViewModel -&amp;gt; ViewModel把输入数据进行业务逻辑处理，加工成输出数据 -&amp;gt; 测试ViewModel的输出数据是否正确
+进行单元测试前需做">
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post'
+  };
+</script>
+
+
+
+  <title> 如何对ViewModel进行单元测试 | 刘铎.Me </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+
+
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘铎.Me</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">iOS技术博客</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content"> 
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                如何对ViewModel进行单元测试
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2015-10-26T21:55:09+08:00" content="2015-10-26">
+              2015-10-26
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><p>使用<code>MVVM</code>架构来开发APP的好处之一就是便于测试业务逻辑，由于<code>ViewModel</code>不涉及界面，就不用考虑Mock对象了，测试起来也方便的多。</p>
+<h4 id="对ViewModel进行单元测试的一般流程">对ViewModel进行单元测试的一般流程</h4><p>创建<code>ViewModel</code> -&gt; 把输入数据交给<code>ViewModel</code> -&gt; <code>ViewModel</code>把输入数据进行业务逻辑处理，加工成输出数据 -&gt; 测试<code>ViewModel</code>的输出数据是否正确</p>
+<p>进行单元测试前需做一些配置，可参考：<br><a href="http://liuduoios.github.io/2015/10/24/Swift-2-%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%85%B3%E9%94%AE%E5%AD%97-testable/">http://liuduoios.github.io/2015/10/24/Swift-2-%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%85%B3%E9%94%AE%E5%AD%97-testable/</a></p>
+<h4 id="下面拿一个简单的例子来说明">下面拿一个简单的例子来说明</h4><p>APP启动后界面如下：</p>
+<center><img style="width: 50%; height: 50%;" src="/QQ20151026-1.png"></center>
+
+<p>这个例子中含有两个<code>ViewModel</code>类，一个是列表的<code>ListViewModel</code>，其中含有根据接口返回数据来计算Cell行数的业务逻辑，内容如下：<br>这里数据绑定和变化监听用了开源库<code>SwiftBond</code><a href="https://github.com/SwiftBond/Bond" target="_blank" rel="external">https://github.com/SwiftBond/Bond</a><br><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"><span class="keyword">import</span> Bond</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ListViewModel</span>: <span class="title">NSObject</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> numberOfRows: <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.items.value?.<span class="built_in">count</span> ?? <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> items: <span class="type">Observable</span>&lt;[<span class="type">Item</span>]?&gt; = <span class="type">Observable</span>(<span class="literal">nil</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">requestData</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> configuration = <span class="type">NSURLSessionConfiguration</span>.defaultSessionConfiguration()</span><br><span class="line">        <span class="keyword">let</span> session = <span class="type">NSURLSession</span>(configuration: configuration)</span><br><span class="line">        session.dataTaskWithURL(<span class="type">NSURL</span>(string: <span class="string">"http://www.google.com"</span>)!) &#123; (data, response, error) -&gt; <span class="type">Void</span> <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">let</span> jsonStr = <span class="type">String</span>(data: data!, encoding: <span class="type">NSUTF8StringEncoding</span>)</span><br><span class="line">            <span class="keyword">let</span> jsonData = jsonStr?.dataUsingEncoding(<span class="type">NSUTF8StringEncoding</span>)</span><br><span class="line">            <span class="keyword">do</span> &#123;</span><br><span class="line">                <span class="keyword">var</span> items = [<span class="type">Item</span>]()</span><br><span class="line">                </span><br><span class="line">                <span class="keyword">let</span> dic = <span class="keyword">try</span> <span class="type">NSJSONSerialization</span>.<span class="type">JSONObjectWithData</span>(jsonData!, options: <span class="type">NSJSONReadingOptions</span>(rawValue: <span class="number">0</span>)) <span class="keyword">as</span>! [<span class="type">String</span>: <span class="type">AnyObject</span>]</span><br><span class="line">                <span class="keyword">let</span> itemDics = dic[<span class="string">"data"</span>] <span class="keyword">as</span>! [[<span class="type">String</span>: <span class="type">String</span>]]</span><br><span class="line">                <span class="keyword">for</span> itemDic <span class="keyword">in</span> itemDics &#123;</span><br><span class="line">                    items.append(<span class="type">Item</span>(dic: itemDic))</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                <span class="keyword">self</span>.items.next(items)</span><br><span class="line">            &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;.resume()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">cellViewModelAtIndexPath</span><span class="params">(indexPath: NSIndexPath)</span></span> -&gt; <span class="type">CellViewModel</span>? &#123;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> items = items.value <span class="keyword">else</span> &#123; <span class="keyword">return</span> <span class="literal">nil</span> &#125;</span><br><span class="line">        <span class="keyword">if</span> indexPath.row &lt; items.<span class="built_in">count</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="type">CellViewModel</span>(item: items[indexPath.row])</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>另一个是Cell的<code>CellViewModel</code>，其中含有把title变为大写的业务逻辑，内容如下：<br><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CellViewModel</span>: <span class="title">NSObject</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(item: <span class="type">Item</span>) &#123;</span><br><span class="line">        <span class="keyword">super</span>.<span class="keyword">init</span>()</span><br><span class="line">        <span class="keyword">self</span>.item = item</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> item: <span class="type">Item</span>?</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> title: <span class="type">String</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> item?.title?.uppercaseString</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> subtitle: <span class="type">String</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> item?.subtitle</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="测试ListViewModel">测试<code>ListViewModel</code></h4><p>这里设计到网络请求数据，因此要用到一个stub开源库，这里使用了<code>Mockingjay</code>。<br><strong>对于stub开源库的选择：</strong><br>如果你的项目是纯Swift的，推荐使用<code>Mockingjay</code><a href="https://github.com/kylef/Mockingjay" target="_blank" rel="external">https://github.com/kylef/Mockingjay</a><br>如果你的项目是Objective-C或者OC和Swift混编的，推荐使用<code>OHHTTPStubs</code><a href="https://github.com/AliSoftware/OHHTTPStubs" target="_blank" rel="external">https://github.com/AliSoftware/OHHTTPStubs</a></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> XCTest</span><br><span class="line"><span class="keyword">import</span> Mockingjay</span><br><span class="line"><span class="keyword">import</span> Bond</span><br><span class="line"><span class="preprocessor">@testable</span> <span class="keyword">import</span> ViewModelUnitTest</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ListViewModelTests</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        <span class="comment">// Put setup code here. This method is called before the invocation of each test method in the class.</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Put teardown code here. This method is called after the invocation of each test method in the class.</span></span><br><span class="line">        <span class="keyword">super</span>.tearDown()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">testNumberOfRows</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> path = <span class="type">NSBundle</span>(forClass: <span class="keyword">self</span>.<span class="keyword">dynamicType</span>).pathForResource(<span class="string">"Data"</span>, ofType: <span class="string">"json"</span>)!</span><br><span class="line">        <span class="keyword">let</span> data = <span class="type">NSData</span>(contentsOfFile: path)!</span><br><span class="line">        stub(everything, builder: jsonData(data))</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> expectation = expectationWithDescription(<span class="string">"get items data"</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> viewModel = <span class="type">ListViewModel</span>()</span><br><span class="line">        viewModel.items.observeNew(&#123; (items) -&gt; () <span class="keyword">in</span></span><br><span class="line">            expectation.fulfill()</span><br><span class="line">        &#125;)</span><br><span class="line">        viewModel.requestData()</span><br><span class="line">        </span><br><span class="line">        waitForExpectationsWithTimeout(<span class="number">10</span>) &#123; (error) -&gt; <span class="type">Void</span> <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">if</span> error != <span class="literal">nil</span> &#123; <span class="type">XCTFail</span>(<span class="string">"time out"</span>) &#125;</span><br><span class="line">            <span class="type">XCTAssertEqual</span>(viewModel.numberOfRows, <span class="number">2</span>, <span class="string">"行数等于2"</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="测试CellViewModel">测试<code>CellViewModel</code></h4><p>不涉及网络请求，直接对业务逻辑进行测试就好了。<br><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> XCTest</span><br><span class="line"><span class="preprocessor">@testable</span> <span class="keyword">import</span> ViewModelUnitTest</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CellViewModelTests</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        <span class="comment">// Put setup code here. This method is called before the invocation of each test method in the class.</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Put teardown code here. This method is called after the invocation of each test method in the class.</span></span><br><span class="line">        <span class="keyword">super</span>.tearDown()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">testTitle</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> item = <span class="type">Item</span>(dic: [<span class="string">"name"</span>: <span class="string">"abc"</span>, <span class="string">"subname"</span>: <span class="string">"def"</span>])</span><br><span class="line">        <span class="keyword">let</span> viewModel = <span class="type">CellViewModel</span>(item: item)</span><br><span class="line">        <span class="type">XCTAssertEqual</span>(viewModel.title, <span class="string">"ABC"</span>, <span class="string">"title是否变为大写"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/26/MVVM核心概念/" rel="next" title="MVVM核心概念">
+                <i class="fa fa-chevron-left"></i> MVVM核心概念
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+ </div>
+
+        
+
+        
+          <div class="comments" id="comments">
+            
+          </div>
+        
+      </div>
+
+      
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="avatar.png" alt="刘铎" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">刘铎</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description">iOS技术博客</p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">分类</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">1</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#对ViewModel进行单元测试的一般流程"><span class="nav-number">1.</span> <span class="nav-text">对ViewModel进行单元测试的一般流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#下面拿一个简单的例子来说明"><span class="nav-number">2.</span> <span class="nav-text">下面拿一个简单的例子来说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#测试ListViewModel"><span class="nav-number">3.</span> <span class="nav-text">测试ListViewModel</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#测试CellViewModel"><span class="nav-number">4.</span> <span class="nav-text">测试CellViewModel</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+      
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner"> <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2015</span>
+  <span class="with-love">
+    <i class="icon-next-heart fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘铎</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+ </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+  
+    
+    
+
+  
+
+
+  
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js?v=0.4.5.2" id="motion.global"></script>
+
+
+
+
+  <script type="text/javascript" src="/js/nav-toggle.js?v=0.4.5.2"></script>
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 0.4 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+
+      isMobile() && FastClick.attach(document.body);
+
+      // Define Motion Sequence.
+      motionIntegrator
+        .add(motionMiddleWares.logo)
+        .add(motionMiddleWares.menu)
+        .add(motionMiddleWares.backToTop)
+        .add(motionMiddleWares.postList)
+        .add(motionMiddleWares.sidebar);
+
+      // Bootstrap Motion.
+      motionIntegrator.bootstrap();
+    });
+  </script>
+
+  
+  
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/lazyload.js"></script>
+  <script type="text/javascript">
+    $(function () {
+      $("#posts").find('img').lazyload({
+        placeholder: "/images/loading.gif",
+        effect: "fadeIn"
+      });
+    });
+  </script>
+</body>
+</html>
