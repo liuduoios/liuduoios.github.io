@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[刘铎.Me]]></title>
+  <subtitle><![CDATA[iOS技术博客]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://liuduoios.github.io/"/>
+  <updated>2015-10-26T14:19:25.000Z</updated>
+  <id>http://liuduoios.github.io/</id>
+  
+  <author>
+    <name><![CDATA[刘铎]]></name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[如何对ViewModel进行单元测试]]></title>
+    <link href="http://liuduoios.github.io/2015/10/26/%E5%A6%82%E4%BD%95%E5%AF%B9ViewModel%E8%BF%9B%E8%A1%8C%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/"/>
+    <id>http://liuduoios.github.io/2015/10/26/如何对ViewModel进行单元测试/</id>
+    <published>2015-10-26T13:55:09.000Z</published>
+    <updated>2015-10-26T14:19:25.000Z</updated>
+    <content type="html"><![CDATA[<p>使用<code>MVVM</code>架构来开发APP的好处之一就是便于测试业务逻辑，由于<code>ViewModel</code>不涉及界面，就不用考虑Mock对象了，测试起来也方便的多。</p>
+<h4 id="对ViewModel进行单元测试的一般流程">对ViewModel进行单元测试的一般流程</h4><p>创建<code>ViewModel</code> -&gt; 把输入数据交给<code>ViewModel</code> -&gt; <code>ViewModel</code>把输入数据进行业务逻辑处理，加工成输出数据 -&gt; 测试<code>ViewModel</code>的输出数据是否正确</p>
+<p>进行单元测试前需做一些配置，可参考：<br><a href="http://liuduoios.github.io/2015/10/24/Swift-2-%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%85%B3%E9%94%AE%E5%AD%97-testable/">http://liuduoios.github.io/2015/10/24/Swift-2-%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%85%B3%E9%94%AE%E5%AD%97-testable/</a></p>
+<h4 id="下面拿一个简单的例子来说明">下面拿一个简单的例子来说明</h4><p>APP启动后界面如下：</p>
+<center><img style="width: 50%; height: 50%;" src="/QQ20151026-1.png"></center>
+
+<p>这个例子中含有两个<code>ViewModel</code>类，一个是列表的<code>ListViewModel</code>，其中含有根据接口返回数据来计算Cell行数的业务逻辑，内容如下：<br>这里数据绑定和变化监听用了开源库<code>SwiftBond</code><a href="https://github.com/SwiftBond/Bond" target="_blank" rel="external">https://github.com/SwiftBond/Bond</a><br><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"><span class="keyword">import</span> Bond</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ListViewModel</span>: <span class="title">NSObject</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> numberOfRows: <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.items.value?.<span class="built_in">count</span> ?? <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> items: <span class="type">Observable</span>&lt;[<span class="type">Item</span>]?&gt; = <span class="type">Observable</span>(<span class="literal">nil</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">requestData</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> configuration = <span class="type">NSURLSessionConfiguration</span>.defaultSessionConfiguration()</span><br><span class="line">        <span class="keyword">let</span> session = <span class="type">NSURLSession</span>(configuration: configuration)</span><br><span class="line">        session.dataTaskWithURL(<span class="type">NSURL</span>(string: <span class="string">"http://www.google.com"</span>)!) &#123; (data, response, error) -&gt; <span class="type">Void</span> <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">let</span> jsonStr = <span class="type">String</span>(data: data!, encoding: <span class="type">NSUTF8StringEncoding</span>)</span><br><span class="line">            <span class="keyword">let</span> jsonData = jsonStr?.dataUsingEncoding(<span class="type">NSUTF8StringEncoding</span>)</span><br><span class="line">            <span class="keyword">do</span> &#123;</span><br><span class="line">                <span class="keyword">var</span> items = [<span class="type">Item</span>]()</span><br><span class="line">                </span><br><span class="line">                <span class="keyword">let</span> dic = <span class="keyword">try</span> <span class="type">NSJSONSerialization</span>.<span class="type">JSONObjectWithData</span>(jsonData!, options: <span class="type">NSJSONReadingOptions</span>(rawValue: <span class="number">0</span>)) <span class="keyword">as</span>! [<span class="type">String</span>: <span class="type">AnyObject</span>]</span><br><span class="line">                <span class="keyword">let</span> itemDics = dic[<span class="string">"data"</span>] <span class="keyword">as</span>! [[<span class="type">String</span>: <span class="type">String</span>]]</span><br><span class="line">                <span class="keyword">for</span> itemDic <span class="keyword">in</span> itemDics &#123;</span><br><span class="line">                    items.append(<span class="type">Item</span>(dic: itemDic))</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                <span class="keyword">self</span>.items.next(items)</span><br><span class="line">            &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;.resume()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">cellViewModelAtIndexPath</span><span class="params">(indexPath: NSIndexPath)</span></span> -&gt; <span class="type">CellViewModel</span>? &#123;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> items = items.value <span class="keyword">else</span> &#123; <span class="keyword">return</span> <span class="literal">nil</span> &#125;</span><br><span class="line">        <span class="keyword">if</span> indexPath.row &lt; items.<span class="built_in">count</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="type">CellViewModel</span>(item: items[indexPath.row])</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>另一个是Cell的<code>CellViewModel</code>，其中含有把title变为大写的业务逻辑，内容如下：<br><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CellViewModel</span>: <span class="title">NSObject</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(item: <span class="type">Item</span>) &#123;</span><br><span class="line">        <span class="keyword">super</span>.<span class="keyword">init</span>()</span><br><span class="line">        <span class="keyword">self</span>.item = item</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> item: <span class="type">Item</span>?</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> title: <span class="type">String</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> item?.title?.uppercaseString</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> subtitle: <span class="type">String</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> item?.subtitle</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="测试ListViewModel">测试<code>ListViewModel</code></h4><p>这里设计到网络请求数据，因此要用到一个stub开源库，这里使用了<code>Mockingjay</code>。<br><strong>对于stub开源库的选择：</strong><br>如果你的项目是纯Swift的，推荐使用<code>Mockingjay</code><a href="https://github.com/kylef/Mockingjay" target="_blank" rel="external">https://github.com/kylef/Mockingjay</a><br>如果你的项目是Objective-C或者OC和Swift混编的，推荐使用<code>OHHTTPStubs</code><a href="https://github.com/AliSoftware/OHHTTPStubs" target="_blank" rel="external">https://github.com/AliSoftware/OHHTTPStubs</a></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> XCTest</span><br><span class="line"><span class="keyword">import</span> Mockingjay</span><br><span class="line"><span class="keyword">import</span> Bond</span><br><span class="line"><span class="preprocessor">@testable</span> <span class="keyword">import</span> ViewModelUnitTest</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ListViewModelTests</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        <span class="comment">// Put setup code here. This method is called before the invocation of each test method in the class.</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Put teardown code here. This method is called after the invocation of each test method in the class.</span></span><br><span class="line">        <span class="keyword">super</span>.tearDown()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">testNumberOfRows</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> path = <span class="type">NSBundle</span>(forClass: <span class="keyword">self</span>.<span class="keyword">dynamicType</span>).pathForResource(<span class="string">"Data"</span>, ofType: <span class="string">"json"</span>)!</span><br><span class="line">        <span class="keyword">let</span> data = <span class="type">NSData</span>(contentsOfFile: path)!</span><br><span class="line">        stub(everything, builder: jsonData(data))</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> expectation = expectationWithDescription(<span class="string">"get items data"</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> viewModel = <span class="type">ListViewModel</span>()</span><br><span class="line">        viewModel.items.observeNew(&#123; (items) -&gt; () <span class="keyword">in</span></span><br><span class="line">            expectation.fulfill()</span><br><span class="line">        &#125;)</span><br><span class="line">        viewModel.requestData()</span><br><span class="line">        </span><br><span class="line">        waitForExpectationsWithTimeout(<span class="number">10</span>) &#123; (error) -&gt; <span class="type">Void</span> <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">if</span> error != <span class="literal">nil</span> &#123; <span class="type">XCTFail</span>(<span class="string">"time out"</span>) &#125;</span><br><span class="line">            <span class="type">XCTAssertEqual</span>(viewModel.numberOfRows, <span class="number">2</span>, <span class="string">"行数等于2"</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="测试CellViewModel">测试<code>CellViewModel</code></h4><p>不涉及网络请求，直接对业务逻辑进行测试就好了。<br><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> XCTest</span><br><span class="line"><span class="preprocessor">@testable</span> <span class="keyword">import</span> ViewModelUnitTest</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CellViewModelTests</span>: <span class="title">XCTestCase</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">setUp</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setUp()</span><br><span class="line">        <span class="comment">// Put setup code here. This method is called before the invocation of each test method in the class.</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">tearDown</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// Put teardown code here. This method is called after the invocation of each test method in the class.</span></span><br><span class="line">        <span class="keyword">super</span>.tearDown()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">testTitle</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> item = <span class="type">Item</span>(dic: [<span class="string">"name"</span>: <span class="string">"abc"</span>, <span class="string">"subname"</span>: <span class="string">"def"</span>])</span><br><span class="line">        <span class="keyword">let</span> viewModel = <span class="type">CellViewModel</span>(item: item)</span><br><span class="line">        <span class="type">XCTAssertEqual</span>(viewModel.title, <span class="string">"ABC"</span>, <span class="string">"title是否变为大写"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>使用<code>MVVM</code>架构来开发APP的好处之一就是便于测试业务逻辑，由于<code>ViewModel</code>不涉及界面，就不用考虑Mock对象了，测试起来也方便的多。</p>
+<h4 id="对ViewModel进行单元测试的一般流程">对View]]>
+    </summary>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[MVVM核心概念]]></title>
+    <link href="http://liuduoios.github.io/2015/10/26/MVVM%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5/"/>
+    <id>http://liuduoios.github.io/2015/10/26/MVVM核心概念/</id>
+    <published>2015-10-26T05:24:44.000Z</published>
+    <updated>2015-10-26T05:28:34.000Z</updated>
+    <content type="html"><![CDATA[<p><img src="/mvvm1.png" alt="Alt text"></p>
+<h4 id="MVVM的优势：">MVVM的优势：</h4><ol>
+<li>轻量级ViewController和View</li>
+<li>UI展现逻辑和业务逻辑分离</li>
+<li>可测试</li>
+</ol>
+<h4 id="MVVM各部分职责">MVVM各部分职责</h4><p><img src="/mvvm2.png" alt="Alt text"></p>
+<p><strong>Model：</strong>同MVC中的Model<br><strong>View(ViewController)：</strong>同MVC中的View，专注于UI展现逻辑<br><strong>ViewModel：</strong>专注于业务逻辑，网络请求，数据库操作等</p>
+<h4 id="MVVM各部分的关系">MVVM各部分的关系</h4><p>MVVM各个部分的关系比MVC的更简单，只要严格遵守以下规则： </p>
+<ol>
+<li>View(ViewController)可以引用ViewModel，反过来不行</li>
+<li>ViewModel可以引用Model，反过来不行</li>
+</ol>
+<h4 id="MVVM的核心">MVVM的核心</h4><p><strong>双向绑定</strong>：<br>View上的一个元素的显示内容和ViewModel中对应的属性值同步更新<br>The TwoWay binding ensures that changes to the ViewModel’s Username property propagate to the Text property of the TextField, and vice-versa, i.e. user-input is reflected in the ViewModel.</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="/mvvm1.png" alt="Alt text"></p>
+<h4 id="MVVM的优势：">MVVM的优势：</h4><ol>
+<li>轻量级ViewController和View</li>
+<li>UI展现逻辑和业务逻辑分离</li>
+<li>]]>
+    </summary>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[JavaScriptCore初探]]></title>
+    <link href="http://liuduoios.github.io/2015/10/24/JavaScriptCore%E5%88%9D%E6%8E%A2/"/>
+    <id>http://liuduoios.github.io/2015/10/24/JavaScriptCore初探/</id>
+    <published>2015-10-24T14:42:30.000Z</published>
+    <updated>2015-10-24T14:42:55.000Z</updated>
+    <content type="html"><![CDATA[<h1 id="JavaScriptCore初探">JavaScriptCore初探</h1><p>在iOS7之前，原生应用和Web应用之间很难通信。如果你想在iOS设备上渲染HTML或者运行JavaScript，你不得不使用<code>UIWebView</code>。iOS7引入了<code>JavaScriptCore</code>，功能更强大，使用更简单。</p>
+<h2 id="JavaScriptCore介绍">JavaScriptCore介绍</h2><p><code>JavaScriptCore</code>是封装了JavaScript和Objective-C桥接的Objective-C API，只要用很少的代码，就可以做到JavaScript调用Objective-C，或者Objective-C调用JavaScript。</p>
+<p>在之前的iOS版本，你只能通过向UIWebView发送<code>stringByEvaluatingJavaScriptFromString:</code>消息来执行一段JavaScript脚本。并且如果想用JavaScript调用Objective-C，必须打开一个自定义的Scheme（例如：foo://），然后在UIWebView的delegate方法<code>webView:shouldStartLoadWithRequest:navigationType</code>中进行处理。</p>
+<h4 id="然而现在可以利用JavaScriptCore的先进功能了，它可以：">然而现在可以利用JavaScriptCore的先进功能了，它可以：</h4><ul>
+<li>运行JavaScript脚本而不需要依赖UIWebView  </li>
+<li>使用现代Objective-C的语法（例如Blocks和下标）</li>
+<li>在Objective-C和JavaScript之间无缝的传递值或者对象</li>
+<li>创建混合对象（原生对象可以将JavaScript值或函数作为一个属性）</li>
+</ul>
+<h4 id="使用Objective-C和JavaScript结合开发的好处：">使用Objective-C和JavaScript结合开发的好处：</h4><ul>
+<li><strong>快速的开发和制作原型</strong>：<br>如果某块区域的业务需求变化的非常频繁，那么可以用JavaScript来开发和制作原型，这比Objective-C效率更高。  </li>
+<li><strong>团队职责划分</strong>：  </li>
+<li><strong>JavaScript是解释型语言</strong>：<br>JavaScript是解释运行的，你可以实时的修改JavaScript代码并立即看到结果。</li>
+</ul>
+<h2 id="JavaScriptCore概述">JavaScriptCore概述</h2><p><strong>JSValue</strong>: 代表一个JavaScript实体，一个JSValue可以表示很多JavaScript原始类型例如boolean, integers, doubles，甚至包括对象和函数。<br><strong>JSManagedValue</strong>: 本质上是一个JSValue，但是可以处理内存管理中的一些特殊情形，它能帮助引用技术和垃圾回收这两种内存管理机制之间进行正确的转换。<br><strong>JSContext</strong>: 代表JavaScript的运行环境，你需要用JSContext来执行JavaScript代码。所有的JSValue都是捆绑在一个JSContext上的。<br><strong>JSExport</strong>: 这是一个协议，可以用这个协议来将原生对象导出给JavaScript，这样原生对象的属性或方法就成为了JavaScript的属性或方法，非常神奇。<br><strong>JSVirtualMachine</strong>: 代表一个对象空间，拥有自己的堆结构和垃圾回收机制。大部分情况下不需要和它直接交互，除非要处理一些特殊的多线程或者内存管理问题。</p>
+<h2 id="JSContext_/_JSValue">JSContext / JSValue</h2><p><code>JSVirtualMachine</code>为JavaScript的运行提供了底层资源，<code>JSContext</code>为JavaScript提供运行环境，通过</p>
+<pre><code>- <span class="list">(<span class="keyword">JSValue</span> <span class="variable">*)evaluateScript:(NSString *</span>)</span>script<span class="comment">;</span>
+</code></pre><p>方法就可以执行一段JavaScript脚本，并且如果其中有方法、变量等信息都会被存储在其中以便在需要的时候使用。<br>而JSContext的创建都是基于JSVirtualMachine：</p>
+<pre><code><span class="pp">- <span class="params">(id)</span>initWithVirtualMachine:<span class="params">(<span class="variable">JSVirtualMachine</span> *)</span>virtualMachine;</span>
+</code></pre><p>如果是使用<code>- (id)init;</code>进行初始化，那么在其内部会自动创建一个新的JSVirtualMachine对象然后调用前边的初始化方法。</p>
+<p>创建一个 JSContext 后，可以很容易地运行 JavaScript 代码来创建变量，做计算，甚至定义方法：</p>
+<pre><code><span class="name">JSContext</span> *<span class="atom">context</span> = [[<span class="name">JSContext</span> <span class="atom">alloc</span>] <span class="atom">init</span>];
+[<span class="atom">context</span> <span class="atom">evaluateScript</span>:@<span class="string">"var num = 5 + 5"</span>];
+[<span class="atom">context</span> <span class="atom">evaluateScript</span>:@<span class="string">"var names = ['Grace', 'Ada', 'Margaret']"</span>];
+[<span class="atom">context</span> <span class="atom">evaluateScript</span>:@<span class="string">"var triple = function(value) { return value * 3 }"</span>];
+<span class="name">JSValue</span> *<span class="atom">tripleNum</span> = [<span class="atom">context</span> <span class="atom">evaluateScript</span>:@<span class="string">"triple(num)"</span>];
+</code></pre><p>任何出自 JSContext 的值都被可以被包裹在一个 JSValue 对象中，JSValue 包装了每一个可能的 JavaScript 值：字符串和数字；数组、对象和方法；甚至错误和特殊的 JavaScript 值诸如 null 和 undefined。</p>
+<p>可以对JSValue调用<code>toString</code>、<code>toBool</code>、<code>toDouble</code>、<code>toArray</code>等等方法把它转换成合适的Objective-C值或对象。</p>
+<h2 id="Objective-C调用JavaScript">Objective-C调用JavaScript</h2><p>例如有一个”Hello.js”文件内容如下：</p>
+<pre><code><span class="function"><span class="keyword">function</span> <span class="title">printHello</span><span class="params">()</span> </span>{
+
+}
+</code></pre><p>在Objective-C中调用printHello方法：</p>
+<pre><code><span class="name">NSString</span> *<span class="atom">scriptPath</span> = [[<span class="name">NSBundle</span> <span class="atom">mainBundle</span>] <span class="atom">pathForResource</span>:@<span class="string">"hello"</span> <span class="atom">ofType</span>:@<span class="string">"js"</span>];
+<span class="name">NSString</span> *<span class="atom">scriptString</span> = [<span class="name">NSString</span> <span class="atom">stringWithContentsOfFile</span>:<span class="atom">scriptPath</span> <span class="atom">encoding</span>:<span class="name">NSUTF8StringEncoding</span> <span class="atom">error</span>:<span class="atom">nil</span>];
+
+<span class="name">JSContext</span> *<span class="atom">context</span> = [[<span class="name">JSContext</span> <span class="atom">alloc</span>] <span class="atom">init</span>];
+[<span class="atom">context</span> <span class="atom">evaluateScript</span>:<span class="atom">scriptString</span>];
+
+<span class="name">JSValue</span> *<span class="atom">function</span> = <span class="atom">self</span>.<span class="atom">context</span>[@<span class="string">"printHello"</span>];
+[<span class="atom">function</span> <span class="atom">callWithArguments</span>:@[]];
+</code></pre><p>分析以上代码：</p>
+<p>首先初始化了一个JSContext，并执行JavaScript脚本，此时printHello函数并没有被调用，只是被读取到了这个context中。</p>
+<p>然后从context中取出对printHello函数的引用，并保存到一个JSValue中。</p>
+<p>注意这里，从JSContext中取出一个JavaScript实体（值、函数、对象），和将一个实体保存到JSContext中，语法均与NSDictionary的取值存值类似，非常简单。</p>
+<p>最后如果JSValue是一个JavaScript函数，可以用callWithArguments来调用，参数是一个数组，如果没有参数则传入空数组@[]。</p>
+<h2 id="JavaScript调用Objective-C">JavaScript调用Objective-C</h2><p>还是上面的例子，将”hello.js”的内容改为：</p>
+<pre><code><span class="function"><span class="keyword">function</span> <span class="title">printHello</span><span class="params">()</span></span> {
+    <span class="built_in">print</span>(<span class="string">"Hello, World!"</span>);
+}
+</code></pre><p>这里的print函数用Objective-C代码来实现</p>
+<pre><code>NSString <span class="keyword">*</span>scriptPath = [[NSBundle mainBundle] pathForResource:<span class="comment">@"hello" ofType:@"js"];</span>
+NSString <span class="keyword">*</span>scriptString = [NSString stringWithContentsOfFile:scriptPath encoding:NSUTF8StringEncoding error:nil];
+
+JSContext <span class="keyword">*</span>context = [[JSContext alloc] init];
+[context evaluateScript:scriptString];
+
+self.context[<span class="comment">@"print"] = ^(NSString *text) {</span>
+    NSLog(<span class="comment">@"%@", text");</span>
+};
+
+JSValue <span class="keyword">*</span>function = self.context[<span class="comment">@"printHello"];</span>
+[function callWithArguments:<span class="comment">@[]];</span>
+</code></pre><p>这里将一个Block以”print”为名传递给JavaScript上下文，JavaScript中调用print函数就可以执行这个Objective-C Block。</p>
+<p>注意这里JavaScript中的字符串可以无缝的桥接为NSString，实参”Hello, World!”被传递给了NSString类型的text形参。</p>
+<h2 id="异常处理">异常处理</h2><p>当JavaScript运行时出现异常，会回调JSContext的exceptionHandler中设置的Block</p>
+<pre><code>context.exceptionHandler = ^(JSContext *context, JSValue *<span class="keyword">exception</span>) {
+       NSLog(<span class="string">@"JS Error: %@"</span>, <span class="keyword">exception</span>);
+};
+
+[context evaluateScript:<span class="string">@"function multiply(value1, value2) { return value1 * value2 "</span>];
+<span class="comment">// 此时会打印Log "JS Error: SyntaxError: Unexpected end of script"</span>
+</code></pre><h2 id="JSExport">JSExport</h2><p>JSExport是一个协议，可以让原生类的属性或方法称为JavaScript的属性或方法。</p>
+<p>看下面的例子：</p>
+<pre><code><span class="variable">@protocol</span> ItemExport &lt;JSExport&gt;
+<span class="variable">@property</span> (strong, nonatomic) NSString *name;
+<span class="variable">@property</span> (strong, nonatomic) NSString *description;
+<span class="variable">@end</span>
+
+<span class="variable">@interface</span> <span class="attribute">Item </span>: NSObject &lt;ItemExport&gt;
+<span class="variable">@property</span> (strong, nonatomic) NSString *name;
+<span class="variable">@property</span> (strong, nonatomic) NSString *description;
+<span class="variable">@end</span>
+</code></pre><p>注意Item类不去直接符合JSExport，而是符合一个自己的协议，这个协议去继承JSExport协议。</p>
+<p>例如有如下JavaScript代码</p>
+<pre><code><span class="function"><span class="keyword">function</span> <span class="title">Item</span><span class="params">(name, description)</span> </span>{
+    <span class="keyword">this</span>.name = name;
+    <span class="keyword">this</span>.description = description;
+}
+
+<span class="keyword">var</span> items = [];
+
+<span class="function"><span class="keyword">function</span> <span class="title">addItem</span><span class="params">(item)</span> </span>{
+    items.push(item);
+}
+</code></pre><p>可以在Objective-C中把Item对象传递给addItem函数</p>
+<pre><code>Item *<span class="literal">item</span> = [[Item alloc] init];
+<span class="literal">item</span>.name = @<span class="string">"itemName"</span>;
+<span class="literal">item</span>.description = @<span class="string">"itemDescription"</span>;
+
+JSValue *<span class="keyword">function</span> = context[@<span class="string">"addItem"</span>];
+[<span class="keyword">function</span> callWithArguments:@[<span class="literal">item</span>]];
+</code></pre><p>或者把Item类导出到JavaScript环境，等待稍后使用</p>
+<pre><code>[<span class="literal">self</span>.context <span class="built_in">set</span>Object:Item.<span class="literal">self</span> <span class="keyword">for</span>KeyedSubscript:@<span class="string">"Item"</span>];
+</code></pre><h2 id="内存管理陷阱">内存管理陷阱</h2><p>Objective-C的内存管理机制是引用技术，JavaScript的内存管理机制是垃圾回收。在大部分情况下，JavaScriptCore能做到在这两种内存管理机制之间无缝无错转换，但也有少数情况需要特别注意。</p>
+<h3 id="在block内捕获JSContext">在block内捕获JSContext</h3><p>Block会为默认为所有被它捕获的对象创建一个强引用。JSContext为它管理的所有JSValue也都拥有一个强引用。并且，JSValue会为它保存的值和它所在的Context都维持一个强引用。这样JSContext和JSValue看上去是循环引用的，然而并不会，垃圾回收机制会打破这个循环引用。</p>
+<p>看下面的例子：</p>
+<pre><code>self.context[@<span class="string">"getVersion"</span>] = ^{
+    NSString* versionString = [[NSBundle mainBundle] <span class="string">objectForInfoDictionaryKey:</span>@<span class="string">"CFBundleShortVersionString"</span>];
+
+    versionString = [@<span class="string">"Xork version "</span> <span class="string">stringByAppendingString:</span>versionString];
+
+    JSContext *context = [JSContext currentContext]; <span class="comment">// 这里不要用self.context</span>
+    JSValue *version = [JSValue <span class="string">valueWithObject:</span>versionString <span class="string">inContext:</span>context];
+
+    <span class="keyword">return</span> version;
+};
+</code></pre><p>使用[JSContext currentContext]而不是self.context来在block中使用JSContext</p>
+<h3 id="JSManagedValue">JSManagedValue</h3><p>当把一个JavaScript值保存到一个本地实例变量上时，需要尤其注意内存管理陷阱。<br>用实例变量保存一个JSValue非常容易引起循环引用。</p>
+<p>看以下下例子，自定义一个UIAlertView，当点击按钮时调用一个JavaScript函数：</p>
+<pre><code><span class="preprocessor">#import <span class="title">&lt;UIKit/UIKit.h&gt;</span></span>
+<span class="preprocessor">#import <span class="title">&lt;JavaScriptCore/JavaScriptCore.h&gt;</span></span>
+
+<span class="class"><span class="keyword">@interface</span> <span class="title">MyAlertView</span> : <span class="title">UIAlertView</span></span>
+
+- (<span class="keyword">id</span>)initWithTitle:(<span class="built_in">NSString</span> *)title
+            message:(<span class="built_in">NSString</span> *)message
+            success:(JSValue *)successHandler
+            failure:(JSValue *)failureHandler
+            context:(JSContext *)context;
+
+<span class="keyword">@end</span>
+</code></pre><p>按照一般自定义AlertView的实现方法，MyAlertView需要持有successHandler，failureHandler这两个JSValue对象</p>
+<p>向JavaScript环境注入一个function</p>
+<pre><code>self.context[<span class="comment">@"presentNativeAlert"] = ^(NSString *title,</span>
+                                        NSString <span class="keyword">*</span>message,
+                                        JSValue <span class="keyword">*</span>success,
+                                        JSValue <span class="keyword">*</span>failure) {
+   JSContext <span class="keyword">*</span>context = [JSContext currentContext];
+   MyAlertView <span class="keyword">*</span>alertView = [[MyAlertView alloc] initWithTitle:title
+                                                       message:message
+                                                       success:success
+                                                       failure:failure
+                                                       context:context];
+   [alertView show];
+</code></pre><p>   };</p>
+<p>因为JavaScript环境中都是“强引用”（相对Objective-C的概念来说）的，这时JSContext强引用了一个presentNativeAlert函数，这个函数中又强引用了MyAlertView<br>等于说JSContext强引用了MyAlertView，而MyAlertView为了持有两个回调强引用了successHandler和failureHandler这两个JSValue，而JSValue又是强引用JSContext的，循环引用便出现了。</p>
+<p>所以苹果提供了一个JSMagagedValue类来解决这个问题。</p>
+<p>看MyAlertView.m的正确实现：</p>
+<pre><code><span class="preprocessor">#import <span class="title">"MyAlertView.h"</span></span>
+
+<span class="class"><span class="keyword">@interface</span> <span class="title">XorkAlertView</span>() &lt;<span class="title">UIAlertViewDelegate</span>&gt;</span>
+<span class="keyword">@property</span> (<span class="keyword">strong</span>, <span class="keyword">nonatomic</span>) JSContext *ctxt;
+<span class="keyword">@property</span> (<span class="keyword">strong</span>, <span class="keyword">nonatomic</span>) JSMagagedValue *successHandler;
+<span class="keyword">@property</span> (<span class="keyword">strong</span>, <span class="keyword">nonatomic</span>) JSMagagedValue *failureHandler;
+<span class="keyword">@end</span>
+
+<span class="class"><span class="keyword">@implementation</span> <span class="title">MyAlertView</span></span>
+
+- (<span class="keyword">id</span>)initWithTitle:(<span class="built_in">NSString</span> *)title
+            message:(<span class="built_in">NSString</span> *)message
+            success:(JSValue *)successHandler
+            failure:(JSValue *)failureHandler
+            context:(JSContext *)context {
+
+    <span class="keyword">self</span> = [<span class="keyword">super</span> initWithTitle:title
+                    message:message
+                   delegate:<span class="keyword">self</span>
+          cancelButtonTitle:<span class="string">@"No"</span>
+          otherButtonTitles:<span class="string">@"Yes"</span>, <span class="literal">nil</span>];
+
+    <span class="keyword">if</span> (<span class="keyword">self</span>) {
+        _ctxt = context;
+
+        _successHandler = [JSManagedValue managedValueWithValue:successHandler];
+        <span class="comment">// A JSManagedValue by itself is a weak reference. You convert it into a conditionally retained</span>
+        <span class="comment">// reference, by inserting it to the JSVirtualMachine using addManagedReference:withOwner:</span>
+        [context<span class="variable">.virtualMachine</span> addManagedReference:_successHandler withOwner:<span class="keyword">self</span>];
+
+        _failureHandler = [JSManagedValue managedValueWithValue:failureHandler];
+        [context<span class="variable">.virtualMachine</span> addManagedReference:_failureHandler withOwner:<span class="keyword">self</span>];
+    }
+    <span class="keyword">return</span> <span class="keyword">self</span>;
+}
+
+- (<span class="keyword">void</span>)alertView:(<span class="built_in">UIAlertView</span> *)alertView clickedButtonAtIndex:(<span class="built_in">NSInteger</span>)buttonIndex {
+    <span class="keyword">if</span> (buttonIndex == <span class="keyword">self</span><span class="variable">.cancelButtonIndex</span>) {
+        JSValue *function = [<span class="keyword">self</span><span class="variable">.failureHandler</span> value];
+        [function callWithArguments:@[]];
+    } <span class="keyword">else</span> {
+        JSValue *function = [<span class="keyword">self</span><span class="variable">.successHandler</span> value];
+        [function callWithArguments:@[]];
+    }
+
+    [<span class="keyword">self</span><span class="variable">.ctxt</span><span class="variable">.virtualMachine</span> removeManagedReference:_failureHandler withOwner:<span class="keyword">self</span>];
+    [<span class="keyword">self</span><span class="variable">.ctxt</span><span class="variable">.virtualMachine</span> removeManagedReference:_successHandler withOwner:<span class="keyword">self</span>];
+}    
+
+<span class="keyword">@end</span>
+</code></pre><p>分析上面例子，从外部传入的JSValue对象在类内部使用JSManagedValue来保存。</p>
+<p>JSManagedValue本身是一个弱引用对象，需要调用JSVirtualMachine的<code>addManagedReference:withOwner:</code>把它添加到JSVirtualMachine对象中，确保使用过程中JSValue不会被释放</p>
+<p>当用户点击AlertView上的按钮时，根据用户点击哪一个按钮，来执行对应的处理函数，这时AlertView也随即被销毁。<br>这时需要手动调用<code>removeManagedReference:withOwner:</code>来移除JSManagedValue。</p>
+<h2 id="参考资料">参考资料</h2><ul>
+<li>《iOS 7 by tutorials》</li>
+<li><a href="https://www.bignerdranch.com/blog/javascriptcore-and-ios-7/" target="_blank" rel="external">https://www.bignerdranch.com/blog/javascriptcore-and-ios-7/</a></li>
+<li><a href="http://nshipster.com/javascriptcore/" target="_blank" rel="external">http://nshipster.com/javascriptcore/</a></li>
+<li><a href="https://github.com/Jobot/JSCoreByExample" target="_blank" rel="external">https://github.com/Jobot/JSCoreByExample</a></li>
+<li><a href="https://github.com/TheHolyGrail/Zoot" target="_blank" rel="external">https://github.com/TheHolyGrail/Zoot</a></li>
+</ul>
+]]></content>
+    <summary type="html">
+    <![CDATA[<h1 id="JavaScriptCore初探">JavaScriptCore初探</h1><p>在iOS7之前，原生应用和Web应用之间很难通信。如果你想在iOS设备上渲染HTML或者运行JavaScript，你不得不使用<code>UIWebView</code>。iOS7]]>
+    </summary>
+    
+      <category term="JavaScriptCore" scheme="http://liuduoios.github.io/tags/JavaScriptCore/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[Swift 2 中的单元测试关键字 @testable]]></title>
+    <link href="http://liuduoios.github.io/2015/10/24/Swift-2-%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%85%B3%E9%94%AE%E5%AD%97-testable/"/>
+    <id>http://liuduoios.github.io/2015/10/24/Swift-2-中的单元测试关键字-testable/</id>
+    <published>2015-10-24T12:20:38.000Z</published>
+    <updated>2015-10-24T14:46:23.000Z</updated>
+    <content type="html"><![CDATA[<p>用Swift写单元测试，需要在测试类中引入主Target模块</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Normandy</span><br></pre></td></tr></table></figure>
+<p>在<code>Swift 1、1.2</code>中，虽然这样做了，但还是无法使用主工程中的<code>internal</code>类，若想测试某些类，必须把它们写成<code>public</code>的，并且要添加到单元测试的Target中。</p>
+<p>在Swift 2 + Xcode 7中，引入了关键字@testable</p>
+<p>现只需要两步：</p>
+<p><strong>第一步：</strong></p>
+<p><img src="/testable.png" alt=""></p>
+<p>在主工程的Target的<code>Build Settings</code>中把<code>Enable Testability</code>设置为<code>YES</code></p>
+<p><strong>第二步：</strong></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">@testable</span> <span class="keyword">import</span> Normandy</span><br></pre></td></tr></table></figure>
+<p>引入主工程时加上<code>@testable</code>关键字作为前缀</p>
+<p>现在即可在测试类中引入任何主工程中的internal类了。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>用Swift写单元测试，需要在测试类中引入主Target模块</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pr]]>
+    </summary>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[在Hexo上安家了]]></title>
+    <link href="http://liuduoios.github.io/2014/08/28/%E5%9C%A8Hexo%E4%B8%8A%E5%AE%89%E5%AE%B6%E4%BA%86/"/>
+    <id>http://liuduoios.github.io/2014/08/28/在Hexo上安家了/</id>
+    <published>2014-08-28T15:39:08.000Z</published>
+    <updated>2015-08-04T04:31:38.000Z</updated>
+    <content type="html"><![CDATA[<p>今天又把博客整回到了Github Pages上，用的是Node.js语言编写的Hexo博客程序。其实一年前就开了一个博客，购买了主机和域名，先是转载了一些技术文章，然后自己也写了几篇，后来就没坚持了，几个月过去了都没上过博客。</p>
+<p>如今机缘巧合之下（帮老婆弄Discuz），又想起了这个博客，于是打算重新弄一下，一切从头开始。因为最近对Git命令的使用和理解有了很大的提高，在GitHub上放置Hexo代码没什么问题了，这回弄起博客来没有什么难关，只有对Hexo还不太熟悉，以后会慢慢地熟悉。</p>
+<p>搭建一个Hexo博客还是很简单的，首先要安装Git和Node.js（自带npm），然后几个命令就搞定了：</p>
+<pre><code>npm <span class="operator"><span class="keyword">install</span> hexo -<span class="keyword">g</span>
+hexo init blog
+cd blog
+npm <span class="keyword">install</span>
+hexo <span class="keyword">server</span></span>
+</code></pre><p>具体的可以查看官网<a href="http://hexo.io/" title="Hexo" target="_blank" rel="external">hexo.io</a>，很简单</p>
+<p>如何在GitHub Pages上搭建博客网上也有很多教程。</p>
+<p>希望这次能坚持下去，博客主要是写给自己看的，记录下自己一路走来的点点滴滴，技术上的成长，或者记录下生活中的一些值得记下的事情。</p>
+<p>也希望能通过坚持写博客而慢慢掌握Hexo的全部功能，掌握MarkDown的所有写法，慢慢学习Node.js，学习技术，通过写博客不仅能锻炼写作能力也能提高自己对技术的理解，因为有的时候你觉得自己理解了一个技术，但是想用文字表达出来的时候缺不一定能表达好，这可能是你对这个技术还没有理解透彻。</p>
+<p>在成长的道路上，勉励自己。</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>今天又把博客整回到了Github Pages上，用的是Node.js语言编写的Hexo博客程序。其实一年前就开了一个博客，购买了主机和域名，先是转载了一些技术文章，然后自己也写了几篇，后来就没坚持了，几个月过去了都没上过博客。</p>
+<p>如今机缘巧合之下（帮老婆弄Dis]]>
+    </summary>
+    
+  </entry>
+  
+</feed>
