@@ -4,7 +4,7 @@
   <subtitle><![CDATA[iOS技术博客]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://liuduoios.github.io/"/>
-  <updated>2015-11-02T04:41:06.000Z</updated>
+  <updated>2015-11-02T05:07:39.000Z</updated>
   <id>http://liuduoios.github.io/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://liuduoios.github.io/2015/11/02/ViewController%E7%98%A6%E8%BA%AB%E7%9A%84%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"/>
     <id>http://liuduoios.github.io/2015/11/02/ViewController瘦身的另一种解决方案/</id>
     <published>2015-11-02T04:05:56.000Z</published>
-    <updated>2015-11-02T04:41:06.000Z</updated>
+    <updated>2015-11-02T05:07:39.000Z</updated>
     <content type="html"><![CDATA[<p>对于Massive View Controller，现在流行的解决方案是MVVM架构，把业务逻辑移入ViewModel来减少ViewController中的代码。</p>
 <p>这几天又看到另一种方案，在此介绍一下。</p>
 <h3 id="例子">例子</h3><p>我们通过例子来说明，这里举的例子是一个常见的基于TableView的界面——一个通讯录用户信息列表。  </p>
@@ -44,8 +44,7 @@
 <h4 id="3-_实现Protocol">3. 实现Protocol</h4><p>首先是实现了<code>APICommunicatorProtocol</code>的<code>APICommunicator</code>类：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">APICommunicator</span>: <span class="title">APICommunicatorProtocol</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">getPeople</span><span class="params">()</span></span> -&gt; (<span class="type">NSError</span>?, [<span class="type">PersonInfo</span>]?) &#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="literal">nil</span>, <span class="literal">nil</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">postPerson</span><span class="params">(personInfo: PersonInfo)</span></span> -&gt; <span class="type">NSError</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>与服务端的交互这里就先省略了，就简单实现一下。</p>
-<p>然后再看实现了<code>PeopleListDataProviderProtocol</code>的<code>PeopleListDataProvider</code>类：</p>
-<p>主要是以下几个部分：</p>
+<p>然后再看实现了<code>PeopleListDataProviderProtocol</code>的<code>PeopleListDataProvider</code>类：<br>主要是以下几个部分：</p>
 <p>对Core Data操作的实现：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">fetch</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">let</span> sortKey = <span class="type">NSUserDefaults</span>.standardUserDefaults().integerForKey(<span class="string">"sort"</span>) == <span class="number">0</span> ? <span class="string">"lastName"</span> : <span class="string">"firstName"</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> sortDescriptor = <span class="type">NSSortDescriptor</span>(key: sortKey, ascending: <span class="literal">true</span>)</span><br><span class="line">    <span class="keyword">let</span> sortDescriptors = [sortDescriptor]</span><br><span class="line"></span><br><span class="line">    fetchedResultsController.fetchRequest.sortDescriptors = sortDescriptors</span><br><span class="line">    <span class="keyword">var</span> error: <span class="type">NSError</span>? = <span class="literal">nil</span></span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">      <span class="keyword">try</span> fetchedResultsController.performFetch()</span><br><span class="line">    &#125; <span class="keyword">catch</span> <span class="keyword">let</span> error1 <span class="keyword">as</span> <span class="type">NSError</span> &#123;</span><br><span class="line">      error = error1</span><br><span class="line">      <span class="built_in">print</span>(<span class="string">"error: <span class="subst">\(error)</span>"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    tableView.reloadData()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>对<code>TableViewDataSource</code>的实现：</p>
