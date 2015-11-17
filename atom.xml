@@ -4,7 +4,7 @@
   <subtitle><![CDATA[iOS技术博客]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://liuduoios.github.io/"/>
-  <updated>2015-11-02T05:07:39.000Z</updated>
+  <updated>2015-11-17T08:49:08.000Z</updated>
   <id>http://liuduoios.github.io/</id>
   
   <author>
@@ -15,11 +15,193 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title><![CDATA[Alamofire 源码赏析（一）基础篇]]></title>
+    <link href="http://liuduoios.github.io/2015/11/17/Alamofire-%E6%BA%90%E7%A0%81%E8%B5%8F%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%E5%9F%BA%E7%A1%80%E7%AF%87/"/>
+    <id>http://liuduoios.github.io/2015/11/17/Alamofire-源码赏析（一）基础篇/</id>
+    <published>2015-11-17T07:12:40.000Z</published>
+    <updated>2015-11-17T08:49:08.000Z</updated>
+    <content type="html"><![CDATA[<p>Alamofire是Swift编写的网络库，如果你的项目使用Swift编写的，则可以用它来替代AFNetworking。Alamofire和AFNetworking都是由<a href="http://nshipster.com/authors/mattt-thompson/" target="_blank" rel="external">Mattt Thompson</a>发起的。Alamofire相比AFNetworking而言，利用了Swift语言的特性，来使得代码更加优雅，并具有一些强大的特性。</p>
+<p>下面我们从源码中来一一赏析这些。</p>
+<h2 id="结构设计">结构设计</h2><p>基于Swift语言的简洁，Alamofire的文件并不多，分成了两个目录Core和Feature，非常的清晰。  </p>
+<p><img style="width: 50%; height: 50%;" src="/Alamofire-源码赏析（一）基础篇/QQ20151117-0@2x.png"></p>
+<p>Core目录中包含了核心的2个类和3个枚举和2个结构体。<br><strong>2个核心类：</strong></p>
+<table>
+<thead>
+<tr>
+<th>类名</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Manager</td>
+<td>提供对外接口，处理NSURLSession的delegate</td>
+</tr>
+<tr>
+<td>Request</td>
+<td>对请求的处理</td>
+</tr>
+</tbody>
+</table>
+<p><strong>3个枚举：</strong></p>
+<table>
+<thead>
+<tr>
+<th>枚举名</th>
+<th>职责  </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Method</td>
+<td>HTTP Method </td>
+</tr>
+<tr>
+<td>ParameterEncoding</td>
+<td>参数编码方式（JSON、PropertyList）</td>
+</tr>
+<tr>
+<td>Result</td>
+<td>定义了请求成功或失败的数据结构</td>
+</tr>
+</tbody>
+</table>
+<p><strong>2个结构体：</strong></p>
+<table>
+<thead>
+<tr>
+<th>结构体名</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Response</td>
+<td>封装了响应需要包含的数据结构</td>
+</tr>
+<tr>
+<td>Error</td>
+<td>错误码定义；创建NSError对象；</td>
+</tr>
+</tbody>
+</table>
+<p>Features目录中则是对这些核心数据结构的扩展：</p>
+<table>
+<thead>
+<tr>
+<th>文件名</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Upload</td>
+<td>处理上传相关操作，是Manager类的扩展</td>
+</tr>
+<tr>
+<td>Download</td>
+<td>处理下载相关操作，是Manager类的扩展</td>
+</tr>
+<tr>
+<td>Stream</td>
+<td>处理输入输出流，是Manager类的扩展</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td>对Response数据进行校验，是Request类的扩展</td>
+</tr>
+<tr>
+<td>ResponseSerialization</td>
+<td>Response的序列化处理，是Request类的扩展</td>
+</tr>
+<tr>
+<td>MultipartFormData</td>
+<td>自己是一个类，被Request的Upload引用，处理MultipartFormData</td>
+</tr>
+<tr>
+<td>ServerTrustPolicyManager</td>
+<td>自己是一个类，被NSURLSession引用，处理安全策略</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到并不是每个文件都是一个类，Upload、Download、Stream这些操作都以extension的形式放到单独的文件中，做到了不仅由Manager类来统一管理，也按职责进行了拆分。<br>同样Validation和ResponseSerialization也以Request类的扩展的形式存在，并支持Request类的链式调用。  </p>
+<p>类图如下：</p>
+<p><img style="width: 50%; height: 50%;" src="/Alamofire-源码赏析（一）基础篇/QQ20151117-1@2x.png"></p>
+<p>职责划分明确，有着很好的内聚性。</p>
+<h3 id="枚举">枚举</h3><p>凡是需要类型划分的都用枚举来实现，例如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">ParameterEncoding</span> </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="type">URL</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">URLEncodedInURL</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">JSON</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">PropertyList</span>(<span class="type">NSPropertyListFormat</span>, <span class="type">NSPropertyListWriteOptions</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">Custom</span>((<span class="type">URLRequestConvertible</span>, [<span class="type">String</span>: <span class="type">AnyObject</span>]?) -&gt; (<span class="type">NSMutableURLRequest</span>, <span class="type">NSError</span>?))</span><br></pre></td></tr></table></figure>
+<p>基于Swift的特性，在枚举中可以定义方法来实现“对外统一接口，内部根据自己当前的枚举值有着不同的实现”，这是Swift中很常见的写法。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">encode</span><span class="params">(...)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">switch</span> <span class="keyword">self</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> .<span class="type">JSON</span>:</span><br><span class="line">        ...</span><br><span class="line">    <span class="keyword">case</span> .<span class="type">PropertyList</span>(<span class="keyword">let</span> format, <span class="keyword">let</span> options):</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再举个Result的例子：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">Result</span>&lt;<span class="title">Value</span>, <span class="title">Error</span>: <span class="title">ErrorType</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="type">Success</span>(<span class="type">Value</span>)</span><br><span class="line">    <span class="keyword">case</span> <span class="type">Failure</span>(<span class="type">Error</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// Returns `true` if the result is a success, `false` otherwise.</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">var</span> isSuccess: <span class="type">Bool</span> &#123;</span><br><span class="line">        <span class="keyword">switch</span> <span class="keyword">self</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> .<span class="type">Success</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        <span class="keyword">case</span> .<span class="type">Failure</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	...    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="结构体">结构体</h3><p>对于那些没有复杂业务逻辑，主要用来保存数据的结构，用结构体来实现，例如Response：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">struct</span> <span class="title">Response</span>&lt;<span class="title">Value</span>, <span class="title">Error</span>: <span class="title">ErrorType</span>&gt; </span>&#123;</span><br><span class="line">    <span class="comment">/// The URL request sent to the server.</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">let</span> request: <span class="type">NSURLRequest</span>?</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// The server's response to the URL request.</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">let</span> response: <span class="type">NSHTTPURLResponse</span>?</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// The data returned by the server.</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">let</span> data: <span class="type">NSData</span>?</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// The result of response serialization.</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">let</span> result: <span class="type">Result</span>&lt;<span class="type">Value</span>, <span class="type">Error</span>&gt;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span><br><span class="line">        Initializes the `Response` instance with the specified URL request, URL response, server data and response</span><br><span class="line">        serialization result.</span><br><span class="line">    </span><br><span class="line">        - parameter request:  The URL request sent to the server.</span><br><span class="line">        - parameter response: The server's response to the URL request.</span><br><span class="line">        - parameter data:     The data returned by the server.</span><br><span class="line">        - parameter result:   The result of response serialization.</span><br><span class="line">    </span><br><span class="line">        - returns: the new `Response` instance.</span><br><span class="line">    */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(request: <span class="type">NSURLRequest</span>?, response: <span class="type">NSHTTPURLResponse</span>?, data: <span class="type">NSData</span>?, result: <span class="type">Result</span>&lt;<span class="type">Value</span>, <span class="type">Error</span>&gt;) &#123;</span><br><span class="line">        <span class="keyword">self</span>.request = request</span><br><span class="line">        <span class="keyword">self</span>.response = response</span><br><span class="line">        <span class="keyword">self</span>.data = data</span><br><span class="line">        <span class="keyword">self</span>.result = result</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="泛型">泛型</h3><p>Alamofire中有着大量对泛型的使用</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">validate</span><span class="generics">&lt;S: SequenceType where S.Generator.Element == Int&gt;</span><span class="params">(statusCode acceptableStatusCode: S)</span></span> -&gt; <span class="type">Self</span> &#123;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">Result</span>&lt;<span class="title">Value</span>, <span class="title">Error</span>: <span class="title">ErrorType</span>&gt; </span>&#123;</span><br></pre></td></tr></table></figure>
+<h3 id="命名空间">命名空间</h3><p>Alamofire是一个Framework，享有独立的命名空间，因此所有的类、结构体、枚举等的命名都不需要加前缀。</p>
+<h2 id="链式调用">链式调用</h2><p>对于Request类，其中的很多方法都使用了返回<code>-&gt; Self</code>的方式。</p>
+<p>请求</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">request</span><span class="params">(</span><br><span class="line">    method: Method,</span><br><span class="line">    <span class="number">_</span> URLString: URLStringConvertible,</span><br><span class="line">    parameters: [String: AnyObject]? = <span class="literal">nil</span>,</span><br><span class="line">    encoding: ParameterEncoding = .URL,</span><br><span class="line">    headers: [String: String]? = <span class="literal">nil</span>)</span></span></span><br><span class="line">    -&gt; <span class="type">Request</span></span><br></pre></td></tr></table></figure>
+<p>鉴权</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">authenticate</span><span class="params">(</span><br><span class="line">    user user: String,</span><br><span class="line">    password: String,</span><br><span class="line">    persistence: NSURLCredentialPersistence = .ForSession)</span></span></span><br><span class="line">    -&gt; <span class="type">Self</span></span><br></pre></td></tr></table></figure>
+<p>进度</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">progress</span><span class="params">(closure: <span class="params">(<span class="params">(Int64, Int64, Int64)</span></span></span></span> -&gt; <span class="type">Void</span>)? = <span class="literal">nil</span>) -&gt; <span class="type">Self</span></span><br></pre></td></tr></table></figure>
+<p>响应</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">response</span><span class="params">(</span><br><span class="line">    queue queue: dispatch_queue_t? = <span class="literal">nil</span>,</span><br><span class="line">    completionHandler: <span class="params">(NSURLRequest?, NSHTTPURLResponse?, NSData?, NSError?)</span></span></span> -&gt; <span class="type">Void</span>)</span><br><span class="line">    -&gt; <span class="type">Self</span></span><br></pre></td></tr></table></figure>
+<p>验证</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">validate</span><span class="params">(validation: Validation)</span></span> -&gt; <span class="type">Self</span></span><br></pre></td></tr></table></figure>
+<p>调用示例：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Alamofire</span>.request(.<span class="type">GET</span>, <span class="string">"https://httpbin.org/get"</span>, parameters: [<span class="string">"foo"</span>: <span class="string">"bar"</span>])</span><br><span class="line">         .validate(statusCode: <span class="number">200</span>..&lt;<span class="number">300</span>)</span><br><span class="line">         .validate(contentType: [<span class="string">"application/json"</span>])</span><br><span class="line">         .response &#123; response <span class="keyword">in</span></span><br><span class="line">             <span class="built_in">print</span>(response)</span><br><span class="line">         &#125;</span><br></pre></td></tr></table></figure>
+<p><code>Alamofire.request(...)</code><br>这一步首先会创建一个Request实例，这个实例中启动了一个NSURLSessionTask，这时，一个请求已经被发出。<br>Request类中有个内部类TaskDelegate用来处理与这个Task相对应的NSURLSession回调，TaskDelegate维护了一个Serial的 NSOperationQueue（maxConcurrentOperationCount = 1），TaskDelegate会随着Request一起创建，这个queue同时也被加载到内存中。<br>接下来的链式调用创建的操作闭包都会追加到这个queue中。</p>
+<p><code>.validate(statusCode: 200..&lt;300)</code><br>把一个用来验证StatusCode的操作闭包追加到queue，如果验证失败，会在TaskDelegate中保存一个NSError</p>
+<p><code>.validate(contentType: [&quot;application/json&quot;])</code><br>把一个用来验证contentType的操作闭包追加到queue，如果验证失败，会在TaskDelegate中保存一个NSError</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.response &#123; response <span class="keyword">in</span></span><br><span class="line">    <span class="built_in">print</span>(response)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>把一个操作闭包（内部创建的闭包，不是response之后跟随的这个闭包）添加到queue，这个闭包中做了如下处理：</p>
+<ol>
+<li>检查TaskDelegate中是否保存了NSError，如果有，则直接把NSError放到response中，并且回调给调用方</li>
+<li>选择一种方式来序列化response</li>
+<li>把序列化的结果放到response参数中，并在主线程调用response之后跟随的这个闭包。</li>
+</ol>
+<p>至此链式调用完成。  </p>
+<p>有个<code>小细节</code>是，request之后追加到queue中的这些操作闭包都是对response进行处理的。所以在queue创建的时候要把queue挂起。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">operationQueue.suspended = <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>在NSURLSession回调结束（URLSession(_:task:didCompleteWithError:)）后恢复queue。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">queue.suspended = <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<p><strong>一句话总结：</strong><br>Alamofire使用了<code>-&gt; Self</code>和<code>顺序队列</code>来实现链式调用。</p>
+<h2 id="处理多请求并发">处理多请求并发</h2><p>Alamofire的最外层是一个Manager，通过这个Manager来为每一个请求创建Request实例（Request实例背后是NSURLSessionTask）。  </p>
+<p>Manager中有个实例变量queue，是一个Serial Dispatch Queue。  </p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="func"><span class="keyword">func</span> <span class="title">request</span><span class="params">(URLRequest: URLRequestConvertible)</span></span> -&gt; <span class="type">Request</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> dataTask: <span class="type">NSURLSessionDataTask</span>!</span><br><span class="line"></span><br><span class="line">    dispatch_sync(queue) &#123;</span><br><span class="line">        dataTask = <span class="keyword">self</span>.session.dataTaskWithRequest(<span class="type">URLRequest</span>.<span class="type">URLRequest</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> request = <span class="type">Request</span>(session: session, task: dataTask)</span><br><span class="line">    delegate[request.delegate.task] = request.delegate</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> startRequestsImmediately &#123;</span><br><span class="line">        request.resume()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> request</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当同时有多个请求被创建时，每个Task的创建操作被同步追加到queue中，并等待它创建完成后，才执行后面的代码。  </p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dispatch_sync(queue) &#123;</span><br><span class="line">    dataTask = <span class="keyword">self</span>.session.dataTaskWithRequest(<span class="type">URLRequest</span>.<span class="type">URLRequest</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>就是说，每个请求是按照顺序一个接一个创建的。  </p>
+<p>Manager有个内部类SessionDelegate，用来处理NSURLSession的回调方法。Manager在创建时，把Manager引用的NSURLSession对象的delegate赋值为这个SessionDelegate对象。  </p>
+<p>前面说到，每个请求创建的同时，一个对应的TaskDelegate实例也会创建，这个实例中保存了请求对应的NSURLSessionTask，<br>请求被创建后，会把相应的TaskDelegate以task为key保存在SessionDelegate中的一个实例变量字典中。<br>（这里有点绕，如果难以理解可以去参考下源码。）</p>
+<p>当发出多次请求后，SessionDelegate中会保存多个TaskDelegate，每个TaskDelegate中都有一个NSURLSessionTask。</p>
+<p>每次NSURLSession的回调回来以后，Manager会根据回调参数中的task（例如URLSession(_:task:didCompleteWithError:)中的task参数），以这个task为key，取出对应的TaskDelegate，并把回调分发给它。</p>
+<p>（以task为key通过Swift语法的中下标subscript来实现。）</p>
+<p>这就是Alamofire的并发请求处理方式。</p>
+<p><strong>总结：</strong>  </p>
+<ol>
+<li>顺序创建Task，以Task为key保存TaskDelegate。  </li>
+<li>由Manager统一并发地处理NSURLSession的回调。  </li>
+<li>在NSURLSession的回调中根据task把回调分发给对应的TaskDelegate。</li>
+</ol>
+<p>（本篇完）<br><br></p>
+<p>下篇预告：<br>《Alamofire 源码赏析（二）安全篇》</p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>Alamofire是Swift编写的网络库，如果你的项目使用Swift编写的，则可以用它来替代AFNetworking。Alamofire和AFNetworking都是由<a href="http://nshipster.com/authors/mattt-thompson]]>
+    </summary>
+    
+  </entry>
+  
+  <entry>
     <title><![CDATA[ViewController瘦身的另一种解决方案]]></title>
     <link href="http://liuduoios.github.io/2015/11/02/ViewController%E7%98%A6%E8%BA%AB%E7%9A%84%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"/>
     <id>http://liuduoios.github.io/2015/11/02/ViewController瘦身的另一种解决方案/</id>
     <published>2015-11-02T04:05:56.000Z</published>
-    <updated>2015-11-02T05:07:39.000Z</updated>
+    <updated>2015-11-02T05:07:45.000Z</updated>
     <content type="html"><![CDATA[<p>对于Massive View Controller，现在流行的解决方案是MVVM架构，把业务逻辑移入ViewModel来减少ViewController中的代码。</p>
 <p>这几天又看到另一种方案，在此介绍一下。</p>
 <h3 id="例子">例子</h3><p>我们通过例子来说明，这里举的例子是一个常见的基于TableView的界面——一个通讯录用户信息列表。  </p>
