@@ -4,7 +4,7 @@
   <subtitle><![CDATA[iOS技术博客]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://liuduo.me/"/>
-  <updated>2015-12-14T03:58:24.000Z</updated>
+  <updated>2015-12-14T04:17:02.000Z</updated>
   <id>http://liuduo.me/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://liuduo.me/2015/12/13/pomvvm/"/>
     <id>http://liuduo.me/2015/12/13/pomvvm/</id>
     <published>2015-12-13T08:42:32.000Z</published>
-    <updated>2015-12-14T03:58:24.000Z</updated>
+    <updated>2015-12-14T04:17:02.000Z</updated>
     <content type="html"><![CDATA[<p>苹果在WWDC2015上介绍了面向协议的编程思想，以及Swift 2.0中可以支持这一编程思想的新特性。<br>参见<a href="https://developer.apple.com/videos/play/wwdc2015-408/" target="_blank" rel="external">WWDC2015 Session 408 Protocol-Oriented Programming in Swift</a><br>然后女中豪杰<a href="https://twitter.com/NatashaTheRobot" target="_blank" rel="external">NatashaTheRobot</a>将其和MVVM结合起来，写了一篇文章介绍<a href="http://natashatherobot.com/swift-2-0-protocol-oriented-mvvm/" target="_blank" rel="external">面向协议的MVVM（POMVVM）</a>，并在2015年底旧金山Swift峰会上作为一个主题分享。<br>本文主要基于以上两个资料，并参考其它一些资料，总结出一套最适合的自己项目的POMVVM架构方法。</p>
 <h2 id="Protocol-Oriented_Programming（POP）">Protocol-Oriented Programming（POP）</h2><p>关于面向协议编程的具体内容可以去看Session 408，这里只引用其中一句话：  </p>
 <pre><code><span class="type">Don</span><span class="symbol">'t</span> start <span class="keyword">with</span> a <span class="class"><span class="keyword">class</span>.  
@@ -49,6 +49,7 @@
 <p><img src="/POMVVM/snapshot.png" alt=""></p>
 <p>MVVM的数据绑定部分我们采用了GitHub上一个开源库SwiftBond，这个库的优势用法简单方便，支持iOS7，维护者更新较为频繁，目前已经是v4.2.0版本。另外RxSwift这个库也是一个很好的选择。</p>
 <p>DEMO源码下载地址：<br><a href="https://github.com/liuduoios/POMVVMDemo" target="_blank" rel="external">https://github.com/liuduoios/POMVVMDemo</a></p>
+<p>建议大家阅读后面的内容之前先下载源码跑一下。</p>
 <p>POP，一切从Protocol开始思考，用Protocol来提供最高级别的抽象。</p>
 <h3 id="MVVMBase">MVVMBase</h3><p>首先我们来抽象MVVM架构层面的东西</p>
 <p>抽象出ViewModel   </p>
