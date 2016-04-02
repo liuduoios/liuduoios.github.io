@@ -36,7 +36,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="sqlite," />
 
 
 
@@ -47,38 +47,87 @@
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
 
 
-<meta name="description" content="用Swift写单元测试，需要在测试类中引入主Target模块
-1import Normandy
-在Swift 1、1.2中，虽然这样做了，但还是无法使用主工程中的internal类，若想测试某些类，必须把它们写成public的，并且要添加到单元测试的Target中。
-在Swift 2 + Xcode 7中，引入了关键字@testable
-现只需要两步：
-第一步：
+<meta name="description" content="锁机制SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。
+SQLite的数据库连接有5种状态：
 
-在主工程的Target的Buil">
+
+
+状态
+对应的锁
+
+
+
+
+未加锁
+—
+
+
+共享（shared）
+共享锁 
+
+
+预留（reserved）
+预留锁
+
+
+未决（pending）">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Swift 2 中的单元测试关键字 @testable">
-<meta property="og:url" content="http://liuduo.me/2015/10/24/Swift-2-中的单元测试关键字-testable/index.html">
+<meta property="og:title" content="浅析SQLite的锁机制和WAL技术">
+<meta property="og:url" content="http://liuduo.me/2016/04/02/sqlitelockandwal/index.html">
 <meta property="og:site_name" content="刘铎.Me">
-<meta property="og:description" content="用Swift写单元测试，需要在测试类中引入主Target模块
-1import Normandy
-在Swift 1、1.2中，虽然这样做了，但还是无法使用主工程中的internal类，若想测试某些类，必须把它们写成public的，并且要添加到单元测试的Target中。
-在Swift 2 + Xcode 7中，引入了关键字@testable
-现只需要两步：
-第一步：
+<meta property="og:description" content="锁机制SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。
+SQLite的数据库连接有5种状态：
 
-在主工程的Target的Buil">
-<meta property="og:image" content="http://liuduo.me/testable.png">
-<meta property="og:updated_time" content="2015-10-24T14:46:23.000Z">
+
+
+状态
+对应的锁
+
+
+
+
+未加锁
+—
+
+
+共享（shared）
+共享锁 
+
+
+预留（reserved）
+预留锁
+
+
+未决（pending）">
+<meta property="og:image" content="http://liuduo.me/\浅析SQLite的锁机制和WAL技术\read.png">
+<meta property="og:image" content="http://liuduo.me/\浅析SQLite的锁机制和WAL技术\write.png">
+<meta property="og:updated_time" content="2016-04-02T06:39:02.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Swift 2 中的单元测试关键字 @testable">
-<meta name="twitter:description" content="用Swift写单元测试，需要在测试类中引入主Target模块
-1import Normandy
-在Swift 1、1.2中，虽然这样做了，但还是无法使用主工程中的internal类，若想测试某些类，必须把它们写成public的，并且要添加到单元测试的Target中。
-在Swift 2 + Xcode 7中，引入了关键字@testable
-现只需要两步：
-第一步：
+<meta name="twitter:title" content="浅析SQLite的锁机制和WAL技术">
+<meta name="twitter:description" content="锁机制SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。
+SQLite的数据库连接有5种状态：
 
-在主工程的Target的Buil">
+
+
+状态
+对应的锁
+
+
+
+
+未加锁
+—
+
+
+共享（shared）
+共享锁 
+
+
+预留（reserved）
+预留锁
+
+
+未决（pending）">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -90,7 +139,7 @@
 
 
 
-  <title> Swift 2 中的单元测试关键字 @testable | 刘铎.Me </title>
+  <title> 浅析SQLite的锁机制和WAL技术 | 刘铎.Me </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -215,7 +264,7 @@
             
             
               
-                Swift 2 中的单元测试关键字 @testable
+                浅析SQLite的锁机制和WAL技术
               
             
           </h1>
@@ -224,8 +273,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2015-10-24T20:20:38+08:00" content="2015-10-24">
-              2015-10-24
+            <time itemprop="dateCreated" datetime="2016-04-02T12:56:49+08:00" content="2016-04-02">
+              2016-04-02
             </time>
           </span>
 
@@ -235,8 +284,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2015/10/24/Swift-2-中的单元测试关键字-testable/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/10/24/Swift-2-中的单元测试关键字-testable/" itemprop="commentsCount"></span>
+                <a href="/2016/04/02/sqlitelockandwal/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/02/sqlitelockandwal/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -255,40 +304,139 @@
       
 
       
-        <span itemprop="articleBody"><p>用Swift写单元测试，需要在测试类中引入主Target模块</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Normandy</span><br></pre></td></tr></table></figure>
-<p>在<code>Swift 1、1.2</code>中，虽然这样做了，但还是无法使用主工程中的<code>internal</code>类，若想测试某些类，必须把它们写成<code>public</code>的，并且要添加到单元测试的Target中。</p>
-<p>在Swift 2 + Xcode 7中，引入了关键字@testable</p>
-<p>现只需要两步：</p>
-<p><strong>第一步：</strong></p>
-<p><img src="/testable.png" alt=""></p>
-<p>在主工程的Target的<code>Build Settings</code>中把<code>Enable Testability</code>设置为<code>YES</code></p>
-<p><strong>第二步：</strong></p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">@testable</span> <span class="keyword">import</span> Normandy</span><br></pre></td></tr></table></figure>
-<p>引入主工程时加上<code>@testable</code>关键字作为前缀</p>
-<p>现在即可在测试类中引入任何主工程中的internal类了。</p>
+        <span itemprop="articleBody"><h1 id="锁机制">锁机制</h1><p>SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。</p>
+<p>SQLite的数据库连接有5种状态：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>对应的锁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>未加锁</td>
+<td>—</td>
+</tr>
+<tr>
+<td>共享（shared）</td>
+<td>共享锁 </td>
+</tr>
+<tr>
+<td>预留（reserved）</td>
+<td>预留锁</td>
+</tr>
+<tr>
+<td>未决（pending）</td>
+<td>未决锁</td>
+</tr>
+<tr>
+<td>排它（exclusive）</td>
+<td>排它锁</td>
+</tr>
+</tbody>
+</table>
+<p>SQL使用锁逐步提升机制，上面的表格从上到下，对应锁的等级逐步提升，等级越高权限就越大。</p>
+<p><strong>未加锁：</strong><br>未和数据库建立连接、已建立连接但是还没访问数据库、已用BEGIN开始了一个事务但未开始读写数据库，处于这些情形时是未加锁状态。</p>
+<p><strong>共享：</strong><br>连接需要从数据库中读取数据时，需要申请获得一个共享锁，如果获得成功，则进入共享状态。</p>
+<p><strong>预留：</strong><br>连接需要写数据库时，首先申请一个预留锁，一个数据库同时只能有一个预留锁，预留锁可以与共享锁共存。获得预留锁后进入预留状态，这时会先在缓冲区中进行需要的修改、更新操作，操作后的结果依然保存在缓冲区中，未真正写入数据库。</p>
+<p><strong>未决：</strong><br>连接从预留升为排它前，需要先升为未决，这时其它连接就不能获得共享锁了，但已经拥有共享锁的连接仍然可以继续正常读数据库，此时，拥有未决锁的连接等待其它拥有共享锁的连接完成工作并释放其共享锁后，提成到排它锁。</p>
+<p><strong>排它：</strong><br>连接需要提交修改时，需要将预留锁升为排它锁，这时其它连接都无法获得任何锁，直到当前连接的排它状态结束。</p>
+<p><strong>一个连接读数据的流程如下：</strong></p>
+<p><img src="\浅析SQLite的锁机制和WAL技术\read.png" alt=""></p>
+<p><strong>一个连接写数据的流程如下：</strong></p>
+<p><img src="\浅析SQLite的锁机制和WAL技术\write.png" alt=""></p>
+<h1 id="死锁">死锁</h1><p>在使用事务的情况下，SQLite的锁机制存在死锁的可能性。<br>见下面例子：</p>
+<table>
+<thead>
+<tr>
+<th>执行顺序</th>
+<th>连接A</th>
+<th>连接B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>BEGIN;</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>BEGIN;</td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td>INSERT INTO foo VALUES (‘x’);</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SELECT * FROM foo;</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td></td>
+<td>COMMIT;</td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td>SQL error: database is locked</td>
+</tr>
+<tr>
+<td>7</td>
+<td>INSERT INTO foo VALUES (‘x’);</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>SQL error: database is locked</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>执行顺序3：连接B要执行写操作，获得预留锁<br>执行顺序4：连接A要执行读操作，获得共享锁<br>执行顺序5：连接B要提交修改，预留锁升级为未决锁<br>执行顺序6：连接B想要升级为排它锁，必须先等待连接A释放共享锁<br>执行顺序7：连接A要执行写操作，需要获得预留锁<br>执行顺序8：连接A获得预留锁失败，必须先等待连接B释放未决锁<br>于是连接A和连接B相互等待对方，发生死锁。</p>
+<p>可以通过正确的使用事务类型来解决以上死锁问题，这里不再陈述。</p>
+<h1 id="WAL技术">WAL技术</h1><p>SQLite在3.7.0开始引入了WAL技术，全称叫Write Ahead Log（预写日志）。</p>
+<p>其原理是：修改并不直接写入到数据库文件中，而是写入到另外一个称为WAL的文件中；如果事务失败，WAL中的记录会被忽略，撤销修改；如果事务成功，它将在随后的某个时间被写回到数据库文件中，提交修改。</p>
+<p>WAL使用检查点将修改写回数据库，默认情况下，当WAL文件发现有1000页修改时，将自动调用检查点。这个页数大小可以自行配置。</p>
+<p><strong>WAL技术带来以下优点：</strong></p>
+<ul>
+<li>读写操作不再互相阻塞，一定程度上解决了SQLite在处理高并发上的性能瓶颈</li>
+<li>大多数场景中，带来很大的性能提升</li>
+<li>磁盘I/O行为更容易被预测</li>
+</ul>
+<p>WAL也有一些缺点，不过在iOS开发中影响不大，除非数据达到GB级时，性能才会降低。</p>
+<p><strong>如何启用WAL：</strong><br>如果是直接使用SQLite，需要设置如下编译指示：  </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">PRAGMA</span> journal_node=WAL;</span></span><br></pre></td></tr></table></figure>
+<p>如果是使用Core Data，则已经默认开启了WAL模式。</p>
 </span>
       
     </div>
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/sqlite/" rel="tag">#sqlite</a>
+          
+        </div>
+      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2014/08/28/在Hexo上安家了/" rel="next" title="在Hexo上安家了">
-                <i class="fa fa-chevron-left"></i> 在Hexo上安家了
+              <a href="/2016/03/12/gointocoredata/" rel="next" title="走进Core Data的世界">
+                <i class="fa fa-chevron-left"></i> 走进Core Data的世界
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2015/10/24/JavaScriptCore初探/" rel="prev" title="JavaScriptCore初探">
-                JavaScriptCore初探 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -313,8 +461,8 @@
         
           <div class="comments" id="comments">
             
-              <div class="ds-thread" data-thread-key="2015/10/24/Swift-2-中的单元测试关键字-testable/"
-                   data-title="Swift 2 中的单元测试关键字 @testable" data-url="http://liuduo.me/2015/10/24/Swift-2-中的单元测试关键字-testable/">
+              <div class="ds-thread" data-thread-key="2016/04/02/sqlitelockandwal/"
+                   data-title="浅析SQLite的锁机制和WAL技术" data-url="http://liuduo.me/2016/04/02/sqlitelockandwal/">
               </div>
             
           </div>
@@ -406,7 +554,7 @@
           <div class="post-toc">
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#锁机制"><span class="nav-number">1.</span> <span class="nav-text">锁机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#死锁"><span class="nav-number">2.</span> <span class="nav-text">死锁</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WAL技术"><span class="nav-number">3.</span> <span class="nav-text">WAL技术</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
