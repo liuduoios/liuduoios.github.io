@@ -101,7 +101,7 @@ SQLite的数据库连接有5种状态：
 未决（pending）">
 <meta property="og:image" content="http://liuduo.me/\浅析SQLite的锁机制和WAL技术\read.png">
 <meta property="og:image" content="http://liuduo.me/\浅析SQLite的锁机制和WAL技术\write.png">
-<meta property="og:updated_time" content="2016-04-02T06:39:02.000Z">
+<meta property="og:updated_time" content="2016-04-11T02:38:33.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="浅析SQLite的锁机制和WAL技术">
 <meta name="twitter:description" content="锁机制SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。
@@ -411,7 +411,7 @@ SQLite的数据库连接有5种状态：
 </ul>
 <p>WAL也有一些缺点，不过在iOS开发中影响不大，除非数据达到GB级时，性能才会降低。</p>
 <p><strong>如何启用WAL：</strong><br>如果是直接使用SQLite，需要设置如下编译指示：  </p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">PRAGMA</span> journal_node=WAL;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">PRAGMA</span> journal_mode=WAL;</span></span><br></pre></td></tr></table></figure>
 <p>如果是使用Core Data，则已经默认开启了WAL模式。</p>
 </span>
       

@@ -4,7 +4,7 @@
   <subtitle><![CDATA[iOS技术博客]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://liuduo.me/"/>
-  <updated>2016-04-02T06:39:02.000Z</updated>
+  <updated>2016-04-11T02:38:33.000Z</updated>
   <id>http://liuduo.me/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://liuduo.me/2016/04/02/sqlitelockandwal/"/>
     <id>http://liuduo.me/2016/04/02/sqlitelockandwal/</id>
     <published>2016-04-02T04:56:49.000Z</published>
-    <updated>2016-04-02T06:39:02.000Z</updated>
+    <updated>2016-04-11T02:38:33.000Z</updated>
     <content type="html"><![CDATA[<h1 id="锁机制">锁机制</h1><p>SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。</p>
 <p>SQLite的数据库连接有5种状态：</p>
 <table>
@@ -127,7 +127,7 @@
 </ul>
 <p>WAL也有一些缺点，不过在iOS开发中影响不大，除非数据达到GB级时，性能才会降低。</p>
 <p><strong>如何启用WAL：</strong><br>如果是直接使用SQLite，需要设置如下编译指示：  </p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">PRAGMA</span> journal_node=WAL;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator"><span class="keyword">PRAGMA</span> journal_mode=WAL;</span></span><br></pre></td></tr></table></figure>
 <p>如果是使用Core Data，则已经默认开启了WAL模式。</p>
 ]]></content>
     <summary type="html">
