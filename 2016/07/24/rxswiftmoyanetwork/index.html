@@ -47,28 +47,19 @@
   <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
 
 
-<meta name="description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。
-RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。
-利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
-举个例子，有如下操作：
-点击按钮 -&amp;gt; 发送网络请求">
+<meta name="description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
+举个例子，有如下操作：点击按钮 -&amp;gt; 发送网络请求 -&amp;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="用 RxSwift + Moya 写出优雅的网络请求代码">
 <meta property="og:url" content="http://liuduo.me/2016/07/24/rxswiftmoyanetwork/index.html">
 <meta property="og:site_name" content="刘铎.Me">
-<meta property="og:description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。
-RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。
-利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
-举个例子，有如下操作：
-点击按钮 -&amp;gt; 发送网络请求">
-<meta property="og:updated_time" content="2016-07-24T05:30:40.000Z">
+<meta property="og:description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
+举个例子，有如下操作：点击按钮 -&amp;gt; 发送网络请求 -&amp;">
+<meta property="og:updated_time" content="2016-07-24T05:32:07.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="用 RxSwift + Moya 写出优雅的网络请求代码">
-<meta name="twitter:description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。
-RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。
-利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
-举个例子，有如下操作：
-点击按钮 -&amp;gt; 发送网络请求">
+<meta name="twitter:description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
+举个例子，有如下操作：点击按钮 -&amp;gt; 发送网络请求 -&amp;">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -245,11 +236,8 @@ RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事
       
 
       
-        <span itemprop="articleBody"><h2 id="RxSwift">RxSwift</h2><p>Rx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。</p>
-<p>RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。</p>
-<p>利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。</p>
-<p>举个例子，有如下操作：</p>
-<p>点击按钮 -&gt; 发送网络请求 -&gt; 对返回的数据进行某种格式处理 -&gt; 显示在一个 UILabel 上</p>
+        <span itemprop="articleBody"><h2 id="RxSwift">RxSwift</h2><p>Rx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。<br>RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。<br>利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。</p>
+<p>举个例子，有如下操作：<br>点击按钮 -&gt; 发送网络请求 -&gt; 对返回的数据进行某种格式处理 -&gt; 显示在一个 UILabel 上</p>
 <p>代码如下：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sendRequestButton</span><br><span class="line">    .rx_tap</span><br><span class="line">    .flatMap(viewModel.loadData)</span><br><span class="line">    .throttle(<span class="number">0.3</span>, scheduler: <span class="type">MainScheduler</span>.instance)</span><br><span class="line">    .<span class="built_in">map</span> &#123; <span class="string">"<span class="subst">\($<span class="number">0</span>.debugDescription)</span>"</span> &#125;</span><br><span class="line">    .bindTo(<span class="keyword">self</span>.resultLabel.rx_text)</span><br><span class="line">    .addDisposableTo(disposeBag)</span><br></pre></td></tr></table></figure>
 <p>是不是看上去很优雅呢？</p>
