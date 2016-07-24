@@ -1,0 +1,726 @@
+<!doctype html>
+<html class="theme-next use-motion theme-next-mist">
+<head>
+  
+
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+  <link rel="stylesheet" type="text/css" href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5"/>
+
+
+
+  
+    <link href='//fonts.lug.ustc.edu.cn/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+  
+
+
+<link rel="stylesheet" type="text/css" href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" />
+
+<link rel="stylesheet" type="text/css" href="/css/main.css?v=0.4.5.2"/>
+
+
+    <meta name="description" content="iOS技术博客<br/>liuduo@hujiang.com" />
+
+
+
+  <meta name="keywords" content="Swift," />
+
+
+
+  <link rel="alternate" href="/atom.xml" title="刘铎.Me" type="application/atom+xml" />
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
+
+
+<meta name="description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。
+RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。
+利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
+举个例子，有如下操作：
+点击按钮 -&amp;gt; 发送网络请求">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用 RxSwift + Moya 写出优雅的网络请求代码">
+<meta property="og:url" content="http://liuduo.me/2016/07/24/rxswiftmoyanetwork/index.html">
+<meta property="og:site_name" content="刘铎.Me">
+<meta property="og:description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。
+RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。
+利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
+举个例子，有如下操作：
+点击按钮 -&amp;gt; 发送网络请求">
+<meta property="og:updated_time" content="2016-07-24T05:30:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="用 RxSwift + Moya 写出优雅的网络请求代码">
+<meta name="twitter:description" content="RxSwiftRx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。
+RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。
+利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。
+举个例子，有如下操作：
+点击按钮 -&amp;gt; 发送网络请求">
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post'
+  };
+</script>
+
+
+
+  <title> 用 RxSwift + Moya 写出优雅的网络请求代码 | 刘铎.Me </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?c3b5d53f540c81b035d7c3772c49d1b2";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">刘铎.Me</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">iOS技术博客</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content"> 
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                用 RxSwift + Moya 写出优雅的网络请求代码
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2016-07-24T13:29:23+08:00" content="2016-07-24">
+              2016-07-24
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/24/rxswiftmoyanetwork/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/24/rxswiftmoyanetwork/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><h2 id="RxSwift">RxSwift</h2><p>Rx 是微软出品的一个 Funtional Reactive Programming 框架，RxSwift 是它的一个 Swift 版本的实现。</p>
+<p>RxSwift 的主要目的是能简单的处理多个异步操作的组合，和事件/数据流。</p>
+<p>利用 RxSwift，我们可以把本来要分散写到各处的代码，通过方法链式调用来组合起来，非常的好看优雅。</p>
+<p>举个例子，有如下操作：</p>
+<p>点击按钮 -&gt; 发送网络请求 -&gt; 对返回的数据进行某种格式处理 -&gt; 显示在一个 UILabel 上</p>
+<p>代码如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sendRequestButton</span><br><span class="line">    .rx_tap</span><br><span class="line">    .flatMap(viewModel.loadData)</span><br><span class="line">    .throttle(<span class="number">0.3</span>, scheduler: <span class="type">MainScheduler</span>.instance)</span><br><span class="line">    .<span class="built_in">map</span> &#123; <span class="string">"<span class="subst">\($<span class="number">0</span>.debugDescription)</span>"</span> &#125;</span><br><span class="line">    .bindTo(<span class="keyword">self</span>.resultLabel.rx_text)</span><br><span class="line">    .addDisposableTo(disposeBag)</span><br></pre></td></tr></table></figure>
+<p>是不是看上去很优雅呢？</p>
+<p>另外<a href="http://mp.weixin.qq.com/s?src=3&amp;timestamp=1469328520&amp;ver=1&amp;signature=zA338yv2NDf-6q-yXYeiRUO-8cj08C9R3O-RJpTIc9*7vaHaPOTs0mDniMxPcj-go15vVq*3BX1-W9Cg0vPW0qF5SwLspAupG-4bXjbd6HFGSTnYASiiMFy-KYvMXZ5RzivNUfbRitaGvnI5iTIOXH3trvYNUhEun8OoUgc11zQ=" target="_blank" rel="external">这篇文章</a>中也有一个类似的例子：</p>
+<p><a href="http://mmbiz.qpic.cn/mmbiz/TWV5bZSvgyqMxqh197JBVbDZRzs55R1vbholKgP2yibJWiaaicoxRTSUgermIicWR6WSiaiaNpEobfh8oHNMueex9fvg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" target="_blank" rel="external"></a></p>
+<p>对应的代码是：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">button</span><br><span class="line">    .rx_tap <span class="comment">// 点击登录</span></span><br><span class="line">    .flatMap(provider.login) <span class="comment">// 登录请求</span></span><br><span class="line">    .<span class="built_in">map</span>(saveToken) <span class="comment">// 保存 token</span></span><br><span class="line">    .flatMap(provider.requestInfo) <span class="comment">// 获取用户信息</span></span><br><span class="line">    .subscribe(handleResult) <span class="comment">// 处理结果</span></span><br></pre></td></tr></table></figure>
+<p>用一连串的链式调用就把一系列事件处理了，是不是很不错。</p>
+<h2 id="Moya">Moya</h2><p>Moya 是 Artsy 团队的 Ash Furrow 主导开发的一个网络抽象层库。它在 Alamofire 基础上提供了一系列简单的抽象接口，让客户端代码不用去直接调用 Alamofire，也不用去关心 NSURLSession。同时提供了很多实用的功能。<br>它的 <code>Target -&gt; Endpoint -&gt; Request</code> 模式也使得每个请求都可以自由定制。</p>
+<p>下面进入正题：</p>
+<h2 id="创建一个请求">创建一个请求</h2><p>Moya 的 TargetType 协议规定的创建网络请求的方法，用枚举来创建，很有 Swift 的风格。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">DataAPI</span> </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="type">Data</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">DataAPI</span>: <span class="title">TargetType</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> baseURL: <span class="type">NSURL</span> &#123; <span class="keyword">return</span> <span class="type">NSURL</span>(string: <span class="string">"http://localhost:3000"</span>)! &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> path: <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"/data"</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> method: <span class="type">Moya</span>.<span class="type">Method</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> .<span class="type">GET</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> parameters: [<span class="type">String</span> : <span class="type">AnyObject</span>]? &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> sampleData: <span class="type">NSData</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> stubbedResponseFromJSONFile(<span class="string">"stub_data"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="创建数据模型">创建数据模型</h2><p>数据模型的创建用了 SwiftyJSON 和 Moya_SwiftyJSONMapper，方便将 JSON 直接映射成 Model 对象。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">DataModel</span>: <span class="title">ALSwiftyJSONAble</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> title: <span class="type">String</span>?</span><br><span class="line">    <span class="keyword">var</span> content: <span class="type">String</span>?</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>?(jsonData: <span class="type">JSON</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.title = jsonData[<span class="string">"title"</span>].string</span><br><span class="line">        <span class="keyword">self</span>.content = jsonData[<span class="string">"content"</span>].string</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="发送请求">发送请求</h2><p>我们在 ViewModel 中发送请求，Moya 自带一个 RxSwift 的扩展。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ViewModel</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">let</span> provider = <span class="type">RxMoyaProvider</span>&lt;<span class="type">DataAPI</span>&gt;() <span class="comment">// 创建为 RxSwift 扩展的 MoyaProvider</span></span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">loadData</span><span class="params">()</span></span> -&gt; <span class="type">Observable</span>&lt;<span class="type">DataModel</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> provider</span><br><span class="line">            .request(.<span class="type">DataRequest</span>) <span class="comment">// 通过某个 Target 来指定发送哪个请求</span></span><br><span class="line">            .debug() <span class="comment">// 打印请求发送中的调试信息</span></span><br><span class="line">            .mapObject(<span class="type">DataModel</span>) <span class="comment">// 请求的结果映射为 DataModel 对象</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在 ViewController 中就可以写上面说到过的那一段了</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sendRequestButton</span><br><span class="line">    .rx_tap <span class="comment">// 观察按钮点击信号</span></span><br><span class="line">    .flatMap(viewModel.loadData) <span class="comment">// 调用 loadData</span></span><br><span class="line">    .<span class="built_in">map</span> &#123; <span class="string">"<span class="subst">\($<span class="number">0</span>.title)</span> <span class="subst">\($<span class="number">0</span>.content)</span>"</span> &#125; <span class="comment">// 格式化显示内容 </span></span><br><span class="line">    .bindTo(<span class="keyword">self</span>.resultLabel.rx_text) <span class="comment">// 绑定到 UILabel 上</span></span><br><span class="line">    .addDisposableTo(disposeBag) <span class="comment">// 添加到 disposeBag，当 disposeBag 释放时，这个绑定关系也会被释放</span></span><br></pre></td></tr></table></figure>
+<p>这样就实现了 点击按钮 -&gt; 发送网络请求 -&gt; 显示结果<br>上面这一段没有考虑错误处理，这个后面会说。</p>
+<h2 id="URL_缓存">URL 缓存</h2><p>URL 缓存则是采用 Alamofire 的缓存处理方式——用系统缓存（NSURLCache）。<br>NSURLCache 默认采用的缓存策略是 NSURLRequestUseProtocolCachePolicy。<br>缓存的具体方式可以由服务端在返回的请求头部添加 Cache-Control 字段来控制。</p>
+<h2 id="离线缓存">离线缓存</h2><p>有一种缓存是系统的缓存做不到的，就是离线缓存。<br>离线缓存的流程是：<br>发请求前先看看本地有没有离线缓存<br>有 -&gt; 使用离线缓存数据渲染界面 -&gt; 发出网络请求 -&gt; 用请求到的数据更新界面<br>无 -&gt; 发出网络请求 -&gt; 用请求到的数据更新界面</p>
+<p>由于 Moya 没有提供离线缓存这个功能，只能自己写了。<br>为 RxMoyaProvider 扩展离线缓存功能：  </p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">RxMoyaProvider</span> </span>&#123;</span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">tryUseOfflineCacheThenRequest</span><span class="params">(token: Target)</span></span> -&gt; <span class="type">Observable</span>&lt;<span class="type">Moya</span>.<span class="type">Response</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">Observable</span>.create &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] observer -&gt; <span class="type">Disposable</span> <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">let</span> key = token.cacheKey <span class="comment">// 缓存 Key，可以根据自己的需求来写，这里采用的是 BaseURL + Path + Parameter转化为JSON字符串</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 先读取缓存内容，有则发出一个信号（onNext），没有则跳过</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">let</span> response = <span class="type">HSURLCache</span>.sharedInstance.cachedResponseForKey(key) &#123;</span><br><span class="line">                observer.onNext(response)</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 发出真正的网络请求</span></span><br><span class="line">            <span class="keyword">let</span> cancelableToken = <span class="keyword">self</span>?.request(token) &#123; result <span class="keyword">in</span></span><br><span class="line">                <span class="keyword">switch</span> result &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">Success</span>(response):</span><br><span class="line">                    observer.onNext(response)</span><br><span class="line">                    observer.onCompleted()</span><br><span class="line">                    </span><br><span class="line">                    <span class="type">HSURLCache</span>.sharedInstance.cacheResponse(response, forKey: key)</span><br><span class="line">                <span class="keyword">case</span> <span class="keyword">let</span> .<span class="type">Failure</span>(error):</span><br><span class="line">                    observer.onError(error)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">return</span> <span class="type">AnonymousDisposable</span> &#123;</span><br><span class="line">                cancelableToken?.cancel()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码创建了一个信号序列，当有离线缓存时，会发出一个信号，当网络请求结果返回时，会发出一个信号，当网络请求失败时，也会发出一个错误信号。</p>
+<figure class="highlight vbscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">上面的 HSURLCache 是我自己写的一个缓存类，通过 SQLite 把 Moya 的 <span class="built_in">Response</span> 对象保存到数据库中。  </span><br><span class="line">由于 Moya 的 <span class="built_in">Response</span> 对象是被 `final` 修饰的，无法通过继承方式为其添加 NSCoder 实现。所以就讲 <span class="built_in">Response</span> 的三个属性分别保存。  </span><br><span class="line">读缓存数据时也是读出三个属性的数据，再用他们创建成 <span class="built_in">Response</span> 对象。</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">loadData</span><span class="params">()</span></span> -&gt; <span class="type">Observable</span>&lt;<span class="type">DataModel</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> provider</span><br><span class="line">        .tryUseOfflineCacheThenRequest(.<span class="type">DataRequest</span>)</span><br><span class="line">        .debug()</span><br><span class="line">        .distinctUntilChanged()</span><br><span class="line">        .mapObject(<span class="type">DataModel</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用离线缓存的网络请求方式可以写成这样，调用了上面所说的 tryUseOfflineCacheThenRequest 方法。<br>并且这里用了 RxSwift 的 distinctUntilChanged 方法，当两个信号完全一样时，会过滤掉后面的信号。这样避免页面在数据相同的情况下渲染两次。</p>
+<h2 id="错误处理">错误处理</h2><p>可以通过判断 event 对象来处理错误，代码如下：</p>
+<figure class="highlight mel"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sendRequestButton</span><br><span class="line">    .rx_tap</span><br><span class="line">    .flatMap(viewModel.loadData)</span><br><span class="line">    .throttle(<span class="number">0.3</span>, scheduler: MainScheduler.<span class="keyword">instance</span>)</span><br><span class="line">    .map &#123; <span class="string">"\($0.title) \($0.content)"</span> &#125;</span><br><span class="line">    .subscribe &#123; <span class="keyword">event</span> <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">switch</span> <span class="keyword">event</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> .Next(let data):</span><br><span class="line">            <span class="keyword">print</span>(data)</span><br><span class="line">        <span class="keyword">case</span> .Error(let <span class="keyword">error</span>):</span><br><span class="line">            <span class="keyword">print</span>(<span class="keyword">error</span>)</span><br><span class="line">        <span class="keyword">case</span> .Completed:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    .addDisposableTo(disposeBag)</span><br></pre></td></tr></table></figure>
+<h2 id="本地假数据">本地假数据</h2><p>这时 Moya 的一个功能，可以在本地放置一个 json 文件，网络请求可以设置成读取本地文件内容来返回数据。可以在接口故障或为开发完时，客户端可以先用假数据来开发，先走通流程。</p>
+<p>只要在创建 RxMoyaProvider 时指定一个参数 stubClosure。</p>
+<p>使用本地假数据：<br><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">RxMoyaProvider&lt;DataAPI&gt;(stubClosure</span>: <span class="string">MoyaProvider.ImmediatelyStub)</span></span><br></pre></td></tr></table></figure></p>
+<p>使用网络接口真实数据：<br><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">RxMoyaProvider&lt;DataAPI&gt;(stubClosure</span>: <span class="string">MoyaProvider.NeverStub)</span></span><br></pre></td></tr></table></figure></p>
+<p>Moya 也提供了一个模拟网络延迟的方法。<br>使用本地假数据并有 3 秒的延迟：<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RxMoyaProvider&lt;DataAPI&gt;<span class="list">(<span class="keyword">stubClosure</span>: MoyaProvider.DelayedStub<span class="list">(<span class="number">3</span>)</span>)</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="Header_处理">Header 处理</h2><p>例如如果想要在 Header 中添加一些字段，例如 access-token，可以通过 Moya 的 Endpoint Closure 方式实现，代码如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> commonEndpointClosure = &#123; (target: <span class="type">Target</span>) -&gt; <span class="type">Endpoint</span>&lt;<span class="type">Target</span>&gt; <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">var</span> <span class="type">URL</span> = target.baseURL.<span class="type">URLByAppendingPathComponent</span>(target.path).absoluteString</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> endpoint = <span class="type">Endpoint</span>&lt;<span class="type">Target</span>&gt;(<span class="type">URL</span>: <span class="type">URL</span>,</span><br><span class="line">                                    sampleResponseClosure: &#123;.<span class="type">NetworkResponse</span>(<span class="number">200</span>, target.sampleData)&#125;,</span><br><span class="line">                                    method: target.method,</span><br><span class="line">                                    parameters: target.parameters)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 添加 AccessToken</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> accessToken = currentUser.accessToken &#123;</span><br><span class="line">        <span class="keyword">return</span> endpoint.endpointByAddingHTTPHeaderFields([<span class="string">"access-token"</span>: accessToken])</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> endpoint</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="插件机制">插件机制</h2><p>另外 Moya 的插件机制也很好用，提供了两个接口，willSendRequest 和 didReceiveResponse，可以在请求发出前和请求收到后做一些额外的处理，并且不和主功能耦合。</p>
+<p>Moya 本身提供了打印网路请求日志的插件和 NetworkActivityIndicator 的插件。</p>
+<p>例如检测 access-token 的合法性：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">internal</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">AccessTokenPlugin</span>: <span class="title">PluginType</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">willSendRequest</span><span class="params">(request: RequestType, target: TargetType)</span></span> &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">didReceiveResponse</span><span class="params">(result: Result&lt;RxMoya.Response, RxMoya.Error&gt;, target: TargetType)</span></span> &#123;</span><br><span class="line">        <span class="keyword">switch</span> result &#123;</span><br><span class="line">        <span class="keyword">case</span> .<span class="type">Success</span>(<span class="keyword">let</span> response):</span><br><span class="line">            <span class="keyword">do</span> &#123;</span><br><span class="line">                <span class="keyword">let</span> jsonObject = <span class="keyword">try</span> response.mapJSON()</span><br><span class="line">                <span class="keyword">let</span> json = <span class="type">JSON</span>(jsonObject)</span><br><span class="line">                <span class="keyword">if</span> json[<span class="string">"status"</span>].intValue == <span class="type">InvalidStatus</span> &#123;</span><br><span class="line">                    <span class="type">NSNotificationCenter</span>.defaultCenter().postNotificationName(<span class="string">"InvalidTokenNotification"</span>, object: <span class="literal">nil</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                </span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">case</span> .<span class="type">Failure</span>(<span class="number">_</span>):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在创建 RxMoyaProvider 时注册插件：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">let</span> provider = <span class="type">RxMoyaProvider</span>&lt;<span class="type">DataAPI</span>&gt;(stubClosure: <span class="type">MoyaProvider</span>.<span class="type">NeverStub</span>, plugins: [<span class="type">AccessTokenPlugin</span>()])</span><br></pre></td></tr></table></figure>
+<h2 id="结语">结语</h2><p>对于用 Swift 编写的项目来说，可以有比 Objective-C 更优雅的方式来编写网络层代码。RxSwift + Moya 是个不错的选择，不仅能使代码更优雅美观，方便维护，还有具有一些很实用的小功能。</p>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Swift/" rel="tag">#Swift</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/02/sqlitelockandwal/" rel="next" title="浅析SQLite的锁机制和WAL技术">
+                <i class="fa fa-chevron-left"></i> 浅析SQLite的锁机制和WAL技术
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+ </div>
+
+        
+
+        
+          <div class="comments" id="comments">
+            
+              <div class="ds-thread" data-thread-key="2016/07/24/rxswiftmoyanetwork/"
+                   data-title="用 RxSwift + Moya 写出优雅的网络请求代码" data-url="http://liuduo.me/2016/07/24/rxswiftmoyanetwork/">
+              </div>
+            
+          </div>
+        
+      </div>
+
+      
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="/avatar.png" alt="刘铎" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">刘铎</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description">iOS技术博客<br/>liuduo@hujiang.com</p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">11</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">分类</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="menu-item-icon icon-next-feed"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator"></div>
+          <div class="post-toc">
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RxSwift"><span class="nav-number">1.</span> <span class="nav-text">RxSwift</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Moya"><span class="nav-number">2.</span> <span class="nav-text">Moya</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建一个请求"><span class="nav-number">3.</span> <span class="nav-text">创建一个请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建数据模型"><span class="nav-number">4.</span> <span class="nav-text">创建数据模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#发送请求"><span class="nav-number">5.</span> <span class="nav-text">发送请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#URL_缓存"><span class="nav-number">6.</span> <span class="nav-text">URL 缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#离线缓存"><span class="nav-number">7.</span> <span class="nav-text">离线缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#错误处理"><span class="nav-number">8.</span> <span class="nav-text">错误处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本地假数据"><span class="nav-number">9.</span> <span class="nav-text">本地假数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Header_处理"><span class="nav-number">10.</span> <span class="nav-text">Header 处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插件机制"><span class="nav-number">11.</span> <span class="nav-text">插件机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结语"><span class="nav-number">12.</span> <span class="nav-text">结语</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator"></div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+      
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner"> <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="icon-next-heart fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘铎</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+ </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+  
+    
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"liuduome"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+    
+     
+
+
+    
+  
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
+  
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/js/motion_global.js?v=0.4.5.2" id="motion.global"></script>
+
+
+
+
+  <script type="text/javascript" src="/js/nav-toggle.js?v=0.4.5.2"></script>
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 0.4 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+
+      isMobile() && FastClick.attach(document.body);
+
+      // Define Motion Sequence.
+      motionIntegrator
+        .add(motionMiddleWares.logo)
+        .add(motionMiddleWares.menu)
+        .add(motionMiddleWares.backToTop)
+        .add(motionMiddleWares.postList)
+        .add(motionMiddleWares.sidebar);
+
+      // Bootstrap Motion.
+      motionIntegrator.bootstrap();
+    });
+  </script>
+
+  
+  
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/lazyload.js"></script>
+  <script type="text/javascript">
+    $(function () {
+      $("#posts").find('img').lazyload({
+        placeholder: "/images/loading.gif",
+        effect: "fadeIn"
+      });
+    });
+  </script>
+</body>
+</html>
