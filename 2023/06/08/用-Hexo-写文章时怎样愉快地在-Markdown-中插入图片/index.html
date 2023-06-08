@@ -103,17 +103,19 @@
   <meta name="keywords" content="Hexo, NexT" />
 
 
-<meta name="description" content="Selector在日常开发中，会经常接触到 Selector，例如常用到的 Target-Action 模式中，Action 就是一个 Selector 类型。所以 Selector 大家想必都很熟悉。 Selector 是一个字符串，用于指代某个类方法或实例方法。 例如一个类有下面两个方法： 12- (NSString *)description;- (NSInteger)addNumber1:">
+<meta name="description" content="用 Markdown 写文章时在文章中插入图片经常是一件很麻烦的事情，那么有没有办法将这件事情变的愉快呢，本文或许能对你有一些帮助。 打开 Hexo 的文章资源文件夹开关Hexo 中，用资源（Asset）来代表除了文章以外的所有文件类型，例如图片、CSS、JS 文件等。如果写文章时需要使用到的图片较少，可以在 source 中建立一个 images 文件夹，把所有需要的图片都放在这个文件夹中，然后">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Objective-C Runtime（一）：Selector 和方法签名">
-<meta property="og:url" content="https://liuduoios.github.io/objective-c-runtime-1-selector-and-method-signature/index.html">
+<meta property="og:title" content="用 Hexo 写文章时怎样愉快地在 Markdown 中插入图片">
+<meta property="og:url" content="https://liuduoios.github.io/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/index.html">
 <meta property="og:site_name" content="My Knowledge Library">
-<meta property="og:description" content="Selector在日常开发中，会经常接触到 Selector，例如常用到的 Target-Action 模式中，Action 就是一个 Selector 类型。所以 Selector 大家想必都很熟悉。 Selector 是一个字符串，用于指代某个类方法或实例方法。 例如一个类有下面两个方法： 12- (NSString *)description;- (NSInteger)addNumber1:">
+<meta property="og:description" content="用 Markdown 写文章时在文章中插入图片经常是一件很麻烦的事情，那么有没有办法将这件事情变的愉快呢，本文或许能对你有一些帮助。 打开 Hexo 的文章资源文件夹开关Hexo 中，用资源（Asset）来代表除了文章以外的所有文件类型，例如图片、CSS、JS 文件等。如果写文章时需要使用到的图片较少，可以在 source 中建立一个 images 文件夹，把所有需要的图片都放在这个文件夹中，然后">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2018-01-31T12:32:39.000Z">
-<meta property="article:modified_time" content="2023-06-05T05:33:26.595Z">
+<meta property="og:image" content="https://liuduoios.github.io/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/image-20230608131748378.png">
+<meta property="article:published_time" content="2023-06-08T04:46:56.000Z">
+<meta property="article:modified_time" content="2023-06-08T05:51:40.961Z">
 <meta property="article:author" content="晨曦微光">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liuduoios.github.io/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/image-20230608131748378.png">
 
 
 
@@ -122,7 +124,7 @@
 
 
 
-  <link rel="canonical" href="https://liuduoios.github.io/objective-c-runtime-1-selector-and-method-signature/"/>
+  <link rel="canonical" href="https://liuduoios.github.io/2023/06/08/用-Hexo-写文章时怎样愉快地在-Markdown-中插入图片/"/>
 
 
 
@@ -131,7 +133,7 @@
     sidebar: "",
   };
 </script>
-  <title>Objective-C Runtime（一）：Selector 和方法签名 | My Knowledge Library</title>
+  <title>用 Hexo 写文章时怎样愉快地在 Markdown 中插入图片 | My Knowledge Library</title>
   
 
 
@@ -278,7 +280,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/objective-c-runtime-1-selector-and-method-signature/">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -295,7 +297,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Objective-C Runtime（一）：Selector 和方法签名</h1>
+          <h1 class="post-title" itemprop="name headline">用 Hexo 写文章时怎样愉快地在 Markdown 中插入图片</h1>
         
 
         <div class="post-meta">
@@ -307,7 +309,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-31T20:32:39+08:00">2018-01-31</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-06-08T12:46:56+08:00">2023-06-08</time>
             
 
             
@@ -317,24 +319,6 @@
           </span>
 
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a></span>
-
-                
-                
-              
-            </span>
-          
 
           
             
@@ -343,8 +327,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/objective-c-runtime-1-selector-and-method-signature/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/objective-c-runtime-1-selector-and-method-signature/" itemprop="commentCount"></span>
+                <a href="/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -352,7 +336,7 @@
 
           
           
-             <span id="/objective-c-runtime-1-selector-and-method-signature/" class="leancloud_visitors" data-flag-title="Objective-C Runtime（一）：Selector 和方法签名">
+             <span id="/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/" class="leancloud_visitors" data-flag-title="用 Hexo 写文章时怎样愉快地在 Markdown 中插入图片">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -382,7 +366,7 @@
                 
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
-                <span title="字数统计">6.6k</span>
+                <span title="字数统计">4.7k</span>
               
 
               
@@ -396,7 +380,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">7 mins.</span>
+                <span title="阅读时长">5 mins.</span>
               
             </div>
           
@@ -416,47 +400,39 @@
       
 
       
-        <h3 id="Selector"><a href="#Selector" class="headerlink" title="Selector"></a>Selector</h3><p>在日常开发中，会经常接触到 Selector，例如常用到的 Target-Action 模式中，Action 就是一个 Selector 类型。所以 Selector 大家想必都很熟悉。</p>
-<p>Selector 是一个<strong>字符串</strong>，用于指代某个类方法或实例方法。</p>
-<p>例如一个类有下面两个方法：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">NSString</span> *)description;</span><br><span class="line">- (<span class="built_in">NSInteger</span>)addNumber1:(<span class="built_in">NSInteger</span>)number1 andNumber2:(<span class="built_in">NSInteger</span>)number2;</span><br></pre></td></tr></table></figure>
+        <p>用 Markdown 写文章时在文章中插入图片经常是一件很麻烦的事情，那么有没有办法将这件事情变的愉快呢，本文或许能对你有一些帮助。</p>
+<h2 id="打开-Hexo-的文章资源文件夹开关"><a href="#打开-Hexo-的文章资源文件夹开关" class="headerlink" title="打开 Hexo 的文章资源文件夹开关"></a>打开 Hexo 的文章资源文件夹开关</h2><p>Hexo 中，用资源（Asset）来代表除了文章以外的所有文件类型，例如图片、CSS、JS 文件等。如果写文章时需要使用到的图片较少，可以在 source 中建立一个 images 文件夹，把所有需要的图片都放在这个文件夹中，然后通过 <code>![](/images/image.jpg)</code> 的方式来引用图片。</p>
+<p>如果图片比较多，就需要一种更好的图片管理方式，Hexo 也提供了一种更组织化的方式来管理资源。可以通过将 <code>config.yml</code> 文件中的 <code>post_asset_folder</code> 选项设为 <code>true</code> 来打开。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">post_asset_folder:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
 
-<p>他们的选择器分别为：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;description&quot;</span></span><br><span class="line"><span class="string">&quot;addNumber1:andNumber2:&quot;</span></span><br></pre></td></tr></table></figure>
+<p>这个功能打开后，每次使用 <code>hexo new &lt;title&gt;</code> 创建新文章时，会自动在 source&#x2F;_posts 目录中创建一个和文章同名的文件夹，所有和文章相关的资源都可以放在这个文件夹中，并通过相对路径来引用他们。</p>
+<p>然而由于 Hexo 内的文件在部署以后路径会改变，在本地写文章时使用的路径，在部署后就变成一个无法找到的路径了，造成图片显示不出来。Hexo 通过一个标签插件语法来解决这个问题，需要把引入图片的方式从 <code>![]()</code> 改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;% asset_img image.jpg This is a image. %&#125;</span><br></pre></td></tr></table></figure>
 
-<p>对于有两个或两个以上参数的方法，如果某个参数的名称为空，那么方法的 Selector 的对应部分也为空。例如：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">NSInteger</span>)add:(<span class="built_in">NSInteger</span>)number1 :(<span class="built_in">NSInteger</span>)number2;</span><br></pre></td></tr></table></figure>
+<p>通过使用 asset_img 这个命令，Hexo 会正确地找到图片 image.jpg 的路径，从而将图片显示出来。</p>
+<p>但是这种方式在本地编写文章时无法看到图片的效果，编写起来也不太方便，也不能很好的配合 Markdown 编辑器来使用。我们还是希望使用标准的 Markdown 语法来引入图片。</p>
+<p>那么就可以使用 <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo-renderer-marked">hexo-renderer-marked</a> 这个模块，使用以下命令来安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-renderer-marked --save</span><br></pre></td></tr></table></figure>
 
-<p>上面方法的 Selector 为：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;add::&quot;</span></span><br></pre></td></tr></table></figure>
+<p>然后在 <code>_config.yml</code> 中配置以下来启用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">post_asset_folder: true</span><br><span class="line">marked:</span><br><span class="line">  prependRoot: true</span><br><span class="line">  postAsset: true</span><br></pre></td></tr></table></figure>
 
-<p>Selector 可以被发送给某个对象或类来进行方法调用，这时被发送的 Selector 需要带上输入参数。例如：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[calculator addNumber1:<span class="number">40</span> andNumber:<span class="number">2</span>];</span><br></pre></td></tr></table></figure>
-
-<p>这里就是把一个 Selector <code>addNumber1:andNumber2</code> 带上了参数发送给了 calulator 对象。</p>
-<h3 id="SEL-类型"><a href="#SEL-类型" class="headerlink" title="SEL 类型"></a>SEL 类型</h3><p>SEL，即 Selector 类型，是 Objective-C 的一个特殊的类型，它是一个<strong>唯一的标识符</strong>，来代表某个 Selector。相同的 Selector 的 SEL 标识符一定也是相同的。</p>
-<p>创建 SEL 类型的变量有两种方式：</p>
-<p><strong>编译时创建：</strong><br>用 @selector 关键字来 创建，这时代码补全功能能在当前位置寻找已经声明过的 Selector，同时编译器也会检查 Selector 的合法性。</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SEL selector = <span class="keyword">@selector</span>(addNumber1:andNumber2:);</span><br></pre></td></tr></table></figure>
-
-<p><strong>运行时创建：</strong><br>用 NSSelectorFromString 创建，参数用一个字符串类型来代表传入的 Selector，运行时可以根据需要来传入不同的 Selector：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SEL selector = <span class="built_in">NSSelectorFromString</span>(<span class="string">@&quot;addNumber1:andNumber2:&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<h3 id="方法签名"><a href="#方法签名" class="headerlink" title="方法签名"></a>方法签名</h3><p>方法签名定义了一个方法的参数和返回值的类型。</p>
-<p>方法签名在日常开发中使用的频度不高，但是它必须得存在，它存在的意义是什么呢？</p>
-<p>这就要提到 Objective-C 进行消息传递的机制了，Objective-C 中给对象发送一个消息，例如 <code>[object description]</code>，会被编译成一个 C 函数的调用（objc_msgSend），这个 C 函数的生成需要知道两个信息，一个是函数名及其参数列表，一个是参数的类型和返回值的类型。</p>
-<p>函数名和参数列表可以从 Selector 中获得，参数和返回值类型则是从方法签名中获得。因此为了确定一个方法，Selector 和方法签名缺一不可。</p>
-<p>编译器在编译时会检查每个方法的声明，从中解析出 Selector 和方法签名。</p>
-<h3 id="签名不匹配"><a href="#签名不匹配" class="headerlink" title="签名不匹配"></a>签名不匹配</h3><p>由于 Objective-C 在方法调用（消息传递）时，具有动态类型（Dynamic typing）的特性，消息的接收者的类型在运行时才能确定。对于可能为任何类型的接收者，例如接收者为 id 类型，因为编译器只能基于方法声明上取得方法签名，这时编译器取得的方法签名只是一个推测值，这就有可能会发生签名不匹配。当发生签名不匹配时，这类情况会导致各种运行时错误，如栈溢出、无效的输入输出参数或无效的返回值等。</p>
-<p>例如有下面三个类：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Calculator1</span> : <span class="title">NSObject</span></span></span><br><span class="line">- (<span class="type">int</span>)addNumber1:(<span class="built_in">NSInteger</span>)number1 andNumber2:(<span class="built_in">NSInteger</span>)number2;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Calculator2</span> : <span class="title">NSObject</span></span></span><br><span class="line">- (<span class="type">float</span>)addNumber1:(<span class="type">float</span>)number1 andNumber2:(<span class="type">float</span>)number2;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Calculator3</span> : <span class="title">NSObject</span></span></span><br><span class="line">- (<span class="built_in">NSInteger</span>)addNumber1:(<span class="built_in">NSInteger</span>)number1 andNumber2:(<span class="built_in">NSInteger</span>)number2;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
-
-<p>对于有可能是这三种类型中的任何一种的接收者，编译器推测的方法类型可能是错误的。如下面的消息传递：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[receiver addNumber1:<span class="number">25</span> andNumber2:<span class="number">10</span>]</span><br></pre></td></tr></table></figure>
-
-<p>编译器在生成 C 函数时，使用的 Selector 为 <code>addNumber1:andNumber2</code>，方法签名为 <code>(NSInteger, NSInteger) -&gt; int</code>。</p>
-<p>然后实际消息发送中，发现 receiver 是 Calculator2 类型，就会发生方法不匹配，从而发生运行时错误。</p>
-<h3 id="怎样避免发生签名不匹配"><a href="#怎样避免发生签名不匹配" class="headerlink" title="怎样避免发生签名不匹配"></a>怎样避免发生签名不匹配</h3><p>避免这类问题发生的办法就是对于方法签名相同的方法，尽量采用不同的名字。</p>
+<p>启用这个模块后，图片会被解析为其对应文章的相对路径，例如文章 xxxx 有一张图片 image.jpg，<code>![](image.jpg)</code> 会被解析为 <code>&lt;img src=&quot;/xxxx/image.jpg&quot; /&gt;</code>。</p>
+<h2 id="使用-Typora-编辑器"><a href="#使用-Typora-编辑器" class="headerlink" title="使用 Typora 编辑器"></a>使用 Typora 编辑器</h2><p>都说 Typora 是最好用的 Markdown 编辑器之一，我尝试了一下，确实很好用，除了它简洁的界面和美观的渲染效果以外，图片插入是一个非常好用的功能。</p>
+<p>Typora 的官网是 <a target="_blank" rel="noopener" href="https://typora.io/">Typora — a markdown editor, markdown reader.</a>，这是一个收费软件，如果有能力，建议支持正版。</p>
+<p>在文章中插入图片最好的方式就是粘贴或者拖拽，Typora 对这两个操作都有很好的支持，那么我们再看看它是怎样和 Hexo 很好地结合起来的。</p>
+<p>Typora 对插入图片的行为可以做一些配置，其设置界面如下：</p>
+<p><img src="/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/image-20230608131748378.png" alt="image-20230608131748378"></p>
+<p>那么可以设置为将粘贴或拖拽进来的图片自动复制到文章的资源目录下，如上图所示，插入图片时的行为设置成<strong>复制到指定路径</strong>，然后填入 <code>./$&#123;filename&#125;</code>，这里的 <code>$&#123;filename&#125;</code> 代表当前正在编辑的 Markdown 文件的文件名。勾选上优先使用相对路径。</p>
+<p>这样粘贴或拖拽进来图片时，图片会被自动复制到文章资源目录下，同时在 Markdown 文件中生成一条 <code>![xxxx](xxxx/image.jpg)</code>，并能在 Markdown 中立刻看到图片。</p>
+<p>不过如果使用 <code>xxxx/image.jpg</code> 这个路径，上文提到的 hexo-renderer-marked 模块是找不到正确图片路径的，必须用 <code>image.jpg</code> 才行。因此需要在文章编写完成后，进行一次查找替换，将所有的 “xxxx&#x2F;“ 替换成空即可。这里的 xxxx 都带入成你的文章名。</p>
+<h2 id="找一个好用的屏幕截图工具"><a href="#找一个好用的屏幕截图工具" class="headerlink" title="找一个好用的屏幕截图工具"></a>找一个好用的屏幕截图工具</h2><p>在写文章的时候，进行屏幕截图是经常会进行的操作，尤其是在写技术文章或者软件操作相关的文章时。</p>
+<p>为了配合 Typora 使用，这个截图工具要可以将截的图保存入剪贴板，并且可以将截的图进行编辑后再放入剪贴板，因为经常要在截图上面划线画箭头画方框什么的。</p>
+<p>我用的是 macOS 系统，一开始我尝试使用系统自带的截图工具，只要按下 <code>Command + Shift + 4</code> 或 <code>Command + Shift + 5</code> 就可以打开。这个工具可以截取全屏、窗口或任意区域，可以设置保存的位置，包含剪贴板，如果设置的位置不是剪贴板，在截图后会在屏幕右下角显示一个预览图，这个预览图可以直接拖拽到 Typora 中，或者点击预览图进行编辑，这些都挺不错的。</p>
+<p>但是这个工具最大的问题是不支持将编辑过的图片保存到剪贴板，如果选择的保存位置是剪贴板，那么截图后不会弹出预览图，也就无法编辑。并且这个工具保存在磁盘上的截图文件名带有空格，有空格的文件名无法在 Markdown 中使用，必须对文件名进行修改，去除空格，很麻烦。</p>
+<p>我现在暂时使用的是微信自带的截图工具，可以随心所欲截屏，然后编辑，编辑后能保存在剪贴板，就能直接粘贴进 Typora 了。我之前也看过别人用的一些功能强大的截图工具，有的工具可以将截图位置的英文变成中文，但我没有详细了解过，微信截图工具目前已经能满足我的需求。如果有朋友知道更好的截图工具，欢迎留言推荐一下。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>在我了解到本文介绍的这种插入图片方法之前，在文章中插入图片是一件很麻烦的事情，这很大影响了我的写作热情。现在有了好用的工具，情况就变得好多了。</p>
+<p>写作是一个很好的习惯。而当找到一个顺手的工具时，能大大提高写作体验，让写作变成一件很愉悦的事情，这样能帮助你更好的坚持写作。</p>
 
       
     </div>
@@ -481,8 +457,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/docker-hexo/" rel="next" title="用 Docker 搭建 Hexo 博客">
-                <i class="fa fa-chevron-left"></i> 用 Docker 搭建 Hexo 博客
+              <a href="/set-proxy-for-docker-container/" rel="next" title="在群辉中给 Docker 容器设置代理">
+                <i class="fa fa-chevron-left"></i> 在群辉中给 Docker 容器设置代理
               </a>
             
           </div>
@@ -490,10 +466,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/objective-c-runtime-2-dynamic-typing-and-dynamic-binding/" rel="prev" title="Objective-C Runtime（二）：动态类型，动态绑定，动态方法决议，内省">
-                Objective-C Runtime（二）：动态类型，动态绑定，动态方法决议，内省 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -679,7 +651,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Selector"><span class="nav-number">1.</span> <span class="nav-text">Selector</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SEL-%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">SEL 类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E7%AD%BE%E5%90%8D"><span class="nav-number">3.</span> <span class="nav-text">方法签名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%BE%E5%90%8D%E4%B8%8D%E5%8C%B9%E9%85%8D"><span class="nav-number">4.</span> <span class="nav-text">签名不匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E6%A0%B7%E9%81%BF%E5%85%8D%E5%8F%91%E7%94%9F%E7%AD%BE%E5%90%8D%E4%B8%8D%E5%8C%B9%E9%85%8D"><span class="nav-number">5.</span> <span class="nav-text">怎样避免发生签名不匹配</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%93%E5%BC%80-Hexo-%E7%9A%84%E6%96%87%E7%AB%A0%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6%E5%A4%B9%E5%BC%80%E5%85%B3"><span class="nav-number">1.</span> <span class="nav-text">打开 Hexo 的文章资源文件夹开关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Typora-%E7%BC%96%E8%BE%91%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">使用 Typora 编辑器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%BE%E4%B8%80%E4%B8%AA%E5%A5%BD%E7%94%A8%E7%9A%84%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%E5%B7%A5%E5%85%B7"><span class="nav-number">3.</span> <span class="nav-text">找一个好用的屏幕截图工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-number">4.</span> <span class="nav-text">写在最后</span></a></li></ol></div>
             
 
           </div>
