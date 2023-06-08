@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Swift," />
+
+
+<meta name="description" content="这篇文章没有技术，只讲怎么用 Xcode 组织项目结构。  开篇写了这么多年的代码，目前觉得最好的构造项目结构的方式就是 模块化。 模块化在 Objective-C 的项目中可能比较难搞起来，但是在 Swift 项目中就游润有余了，因为 Swift 有着天生 Module 的概念，和它的访问控制修饰符。 小型项目搞模块化意义可能不大，对于中型和大型的项目，模块化以后，纵向分层横向分模块，模块间解耦">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swift 模块化项目结构最佳实践">
+<meta property="og:url" content="https://liuduoios.github.io/moduleproject/index.html">
+<meta property="og:site_name" content="My Knowledge Library">
+<meta property="og:description" content="这篇文章没有技术，只讲怎么用 Xcode 组织项目结构。  开篇写了这么多年的代码，目前觉得最好的构造项目结构的方式就是 模块化。 模块化在 Objective-C 的项目中可能比较难搞起来，但是在 Swift 项目中就游润有余了，因为 Swift 有着天生 Module 的概念，和它的访问控制修饰符。 小型项目搞模块化意义可能不大，对于中型和大型的项目，模块化以后，纵向分层横向分模块，模块间解耦">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://liuduo.me/2017/05/22/moduleproject/">
+<meta property="og:image" content="http://liuduo.coding.me/moduleproject/01@2x.png">
+<meta property="og:image" content="http://liuduo.coding.me/moduleproject/02@2x.png">
+<meta property="og:image" content="http://liuduo.coding.me/moduleproject/03@2x.png">
+<meta property="og:image" content="http://liuduo.coding.me/moduleproject/04@2x.png">
+<meta property="og:image" content="http://liuduo.coding.me/moduleproject/05@2x.png">
+<meta property="og:image" content="http://liuduo.coding.me/moduleproject/06@2x.png">
+<meta property="article:published_time" content="2017-05-22T04:28:06.000Z">
+<meta property="article:modified_time" content="2023-06-05T05:33:26.596Z">
+<meta property="article:author" content="晨曦微光">
+<meta property="article:tag" content="Swift">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://liuduo.me/2017/05/22/moduleproject/">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="My Knowledge Library" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://liuduoios.github.io/moduleproject/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Swift 模块化项目结构最佳实践 | My Knowledge Library</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">My Knowledge Library</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">个人博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/moduleproject/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My Knowledge Library">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Swift 模块化项目结构最佳实践</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T12:28:06+08:00">2017-05-22</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Swift/" itemprop="url" rel="index"><span itemprop="name">Swift</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/moduleproject/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/moduleproject/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/moduleproject/" class="leancloud_visitors" data-flag-title="Swift 模块化项目结构最佳实践">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">4.5k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">4 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这篇文章没有技术，只讲怎么用 Xcode 组织项目结构。</p>
+<p><img src="http://liuduo.me/2017/05/22/moduleproject/" alt="ddd"></p>
+<h1 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h1><p>写了这么多年的代码，目前觉得最好的构造项目结构的方式就是 <code>模块化</code>。</p>
+<p>模块化在 <code>Objective-C</code> 的项目中可能比较难搞起来，但是在 <code>Swift</code> 项目中就游润有余了，因为 <code>Swift</code> 有着天生 <code>Module</code> 的概念，和它的访问控制修饰符。</p>
+<p>小型项目搞模块化意义可能不大，对于中型和大型的项目，模块化以后，纵向分层横向分模块，模块间解耦，访问控制，依赖注入，依赖倒转，在开发过程中就能自然而然的写出来，省去以后重构的苦恼。</p>
+<p>大家都知道，Xcode 主要是用 <code>Workspace</code> 和 <code>Project</code> 来组织项目结构的，一个工程只能有一个 <code>Workspace</code>，一个 <code>Workspace</code> 中可以有任意多个 <code>Project</code>。</p>
+<p>而模块化的方式就是把各个业务功能拆分成模块（Framework），然后主工程负责把这些业务模块串联起来构成一个完成的 App。</p>
+<h1 id="工程结构"><a href="#工程结构" class="headerlink" title="工程结构"></a>工程结构</h1><p>在一个项目里，有一个 <code>Workspace</code>，其中有很多个 <code>Project</code>，主工程是一个 <code>Project</code>，每个业务模块也都是一个 <code>Project</code>。</p>
+<p>效果是这样的：</p>
+<p><img src="http://liuduo.coding.me/moduleproject/01@2x.png"></p>
+<p><img src="http://liuduo.coding.me/moduleproject/02@2x.png"></p>
+<p>在工程中，每添加一个新模块的时候，通过点击左下角的 <code>+</code> 来创建，选择 <code>Framework</code> 类型：</p>
+<p><img src="http://liuduo.coding.me/moduleproject/03@2x.png"></p>
+<p>路径选择到 Modules 目录下。</p>
+<p>如果你觉得需要的话，可以对 Modules 目录下的这些 Project 再分目录。</p>
+<h1 id="如何创建-Workspace？"><a href="#如何创建-Workspace？" class="headerlink" title="如何创建 Workspace？"></a>如何创建 Workspace？</h1><p>如果是从一个新工程开始创建，可以在 Xcode 中选择：<code>File -&gt; New -&gt; Workspace...</code> 创建，然后再在创建好的 Workspace 中添加主工程。</p>
+<p>如果你是用了 CocoaPods，在第一次 <code>pod install</code> 时，CocoaPods 会帮你创建好 Workspace。</p>
+<h1 id="依赖配置"><a href="#依赖配置" class="headerlink" title="依赖配置"></a>依赖配置</h1><p>对于每一个模块 xcodeproj，都需要在这里严格配置好它的依赖。</p>
+<p><img src="http://liuduo.coding.me/moduleproject/04@2x.png"></p>
+<p>同属于一个 <code>Workspace</code> 的 <code>Project</code> 们，可以方便的互相配置依赖，Xcode 可以很好的处理好这个依赖。</p>
+<p>配置了依赖以后的 <code>Framework</code>，在编译时 Xcode 会先编译它依赖的那些 <code>Framework</code>, 确保这个 <code>Framework</code> 可以顺利配置成功。</p>
+<p>用这种项目结构时，依赖必须严格配置正确，否则即使在模拟器或真机运行时没有问题，打包的时候一定会出现问题。这样当想知道一个模块依赖了哪些模块时，可以直观的从这里查看到。</p>
+<h1 id="为每一个模块添加-Demo-和单元测试"><a href="#为每一个模块添加-Demo-和单元测试" class="headerlink" title="为每一个模块添加 Demo 和单元测试"></a>为每一个模块添加 Demo 和单元测试</h1><p>由于一个模块是一个单独的 <code>Project</code>，可以在里面方便的添加 Demo 和单元测试的 Target。</p>
+<p><img src="http://liuduo.coding.me/moduleproject/05@2x.png"></p>
+<p>点坐下的 <code>+</code> 即可添加。</p>
+<h1 id="CocoaPods"><a href="#CocoaPods" class="headerlink" title="CocoaPods"></a>CocoaPods</h1><p>如果你的某一个模块需要依赖 <code>CocoaPods</code> 中的库，CocoaPods 本身也很好的支持了这个需求。</p>
+<p>在 <code>Podfile</code> 文件中添加一个 <code>target</code> 的配置即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">target &#x27;Slide&#x27; do</span><br><span class="line">    project &quot;Modules/Slide/Slide&quot;</span><br><span class="line">    pod &#x27;SDWebImage&#x27;, &#x27;3.8.2&#x27;</span><br><span class="line">    pod &#x27;SDWebImage/WebP&#x27;</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<h1 id="Carthage"><a href="#Carthage" class="headerlink" title="Carthage"></a>Carthage</h1><p>使用 Swift 语言的项目也会经常用到 <code>Carthage</code>。一般都是直接依赖 <code>Carthage/Build</code> 中编译好的 <code>.framework</code> 文件，然后类型为 App 的 Project，要配置 copy-framework 脚本，类型为 Framework 的 Project，要在 Build Phases 中添加一个 Copy Files Phases，这是官方文档中的说法。</p>
+<p>但是在我们这种项目结构中，如果为每个模块都配置 Copy Files Phases，会导致打出来的包中，每个模块的 Framework 都包含了它依赖的那些 Framework，导致包大小非常大，因为里面包含了非常多的重复 Framework。</p>
+<p>于是我们再 Workspace 中又建立的一个目录叫 <code>CarthageFrameworks</code>，然后把 <code>Carthage/Checkout</code> 目录中的那些 .xcodeproj 文件拖到这个 CarthageFrameworks 目录中，效果如下：</p>
+<p><img src="http://liuduo.coding.me/moduleproject/06@2x.png"></p>
+<p>这样不仅解决了打包重复包含 Framework 的问题，还能方便的查看 Carthage 引入的库的代码，并且方便的设断点调试。</p>
+<h1 id="列举一下好处"><a href="#列举一下好处" class="headerlink" title="列举一下好处"></a>列举一下好处</h1><ul>
+<li>模块化，各模块之间独立，职责清晰</li>
+<li>开发过程中会自然强制你考虑模块间解耦，访问控制，依赖注入，依赖倒转等问题</li>
+<li>依赖必须严格配置，方便查看和梳理依赖</li>
+<li>每个 <code>Project</code> 都有一个 <code>xxx.xcodeproj</code>文件，这个文件是最常出现冲突的文件了，而且这个文件的冲突还往往很难解决，模块化分开后，各个模块都有单独的 <code>xxx.xcodeproj</code> 文件，大大降低发生冲突的概率。</li>
+<li>模块拥有自己的 Targets 空间，方便创建 Demo 和单元测试</li>
+<li>如果想把模块做成单独的 git 仓库，也非常的方便</li>
+<li>方便进行 Carthage 引入的库的调试</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Swift/" rel="tag"># Swift</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/rxswiftmoyanetwork/" rel="next" title="用 RxSwift + Moya 写出优雅的网络请求代码">
+                <i class="fa fa-chevron-left"></i> 用 RxSwift + Moya 写出优雅的网络请求代码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/sequence_base/" rel="prev" title="Swift 中的 Sequence（一）">
+                Swift 中的 Sequence（一） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%80%E7%AF%87"><span class="nav-number">1.</span> <span class="nav-text">开篇</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B7%A5%E7%A8%8B%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">工程结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA-Workspace%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">如何创建 Workspace？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E9%85%8D%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">依赖配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E6%AF%8F%E4%B8%80%E4%B8%AA%E6%A8%A1%E5%9D%97%E6%B7%BB%E5%8A%A0-Demo-%E5%92%8C%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="nav-number">5.</span> <span class="nav-text">为每一个模块添加 Demo 和单元测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CocoaPods"><span class="nav-number">6.</span> <span class="nav-text">CocoaPods</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Carthage"><span class="nav-number">7.</span> <span class="nav-text">Carthage</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%97%E4%B8%BE%E4%B8%80%E4%B8%8B%E5%A5%BD%E5%A4%84"><span class="nav-number">8.</span> <span class="nav-text">列举一下好处</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">晨曦微光</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">146k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点总阅读时长">2:26</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.2</div>
+
+
+<div>Hosted by <a target="_blank" rel="noopener" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'krbUxLGKWA6SjK4bKeeJcu8Q-gzGzoHsz',
+        appKey: 'G2GNz7MLppJZuew6PZbdiZhf',
+        placeholder: '填写评论内容',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("nGSnOI7jqHLeho9asFx6j3b9-gzGzoHsz", "r6e5CNQIXNTbVb7KFX4R5rxk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

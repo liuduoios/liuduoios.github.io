@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Objective-C," />
+
+
+<meta name="description" content="引言大家都知道，Objective-C 有 4 个对象所有权修饰符（Ownership Qualifier），分别是： 1234__strong__weak__unsafe_unretained__autoreleasing  在日常开发中日常用的最多的就是 __weak，几乎都是为了解决循环引用的问题。__strong 是一个变量默认的修饰符，不需要写。__unsafe_unretained 因">
+<meta property="og:type" content="article">
+<meta property="og:title" content="探索 Objective-C 的对象所有权修饰符">
+<meta property="og:url" content="https://liuduoios.github.io/objectivec-ownership/index.html">
+<meta property="og:site_name" content="My Knowledge Library">
+<meta property="og:description" content="引言大家都知道，Objective-C 有 4 个对象所有权修饰符（Ownership Qualifier），分别是： 1234__strong__weak__unsafe_unretained__autoreleasing  在日常开发中日常用的最多的就是 __weak，几乎都是为了解决循环引用的问题。__strong 是一个变量默认的修饰符，不需要写。__unsafe_unretained 因">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-09-08T10:36:00.000Z">
+<meta property="article:modified_time" content="2023-06-05T05:33:26.597Z">
+<meta property="article:author" content="晨曦微光">
+<meta property="article:tag" content="Objective-C">
+<meta name="twitter:card" content="summary">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="My Knowledge Library" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://liuduoios.github.io/objectivec-ownership/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>探索 Objective-C 的对象所有权修饰符 | My Knowledge Library</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">My Knowledge Library</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">个人博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/objectivec-ownership/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My Knowledge Library">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">探索 Objective-C 的对象所有权修饰符</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-09-08T18:36:00+08:00">2022-09-08</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/objectivec-ownership/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/objectivec-ownership/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/objectivec-ownership/" class="leancloud_visitors" data-flag-title="探索 Objective-C 的对象所有权修饰符">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">22k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">22 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>大家都知道，Objective-C 有 4 个对象所有权修饰符（Ownership Qualifier），分别是：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">__<span class="keyword">strong</span></span><br><span class="line">__<span class="keyword">weak</span></span><br><span class="line">__<span class="keyword">unsafe_unretained</span></span><br><span class="line">__autoreleasing</span><br></pre></td></tr></table></figure>
+
+<p>在日常开发中日常用的最多的就是 <code>__weak</code>，几乎都是为了解决循环引用的问题。<code>__strong</code> 是一个变量默认的修饰符，不需要写。<code>__unsafe_unretained</code> 因为它的不安全，基本上不会去使用它。<code>__autoreleasing</code> 见得最多的地方估计就是 <code>NSError * __autoreleasing *</code> 这个类型声明了，似乎也没有地方需要自己写。</p>
+<p>看到 <code>NSError * __autoreleasing *</code> 这个类型，不禁会思考，这个 <code>__autoreleasing</code> 为啥放在两个星号中间呢，如果放在两个星号的左边，或者放在两个星号的右边行不行呢？</p>
+<p>于是又开始思考另一个相关的问题。我们知道声明常量的时候，const 的位置不同，实际含义就会不同。比如：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSObject</span> <span class="keyword">const</span> *object;</span><br></pre></td></tr></table></figure>
+<p>这里 object 是一个指针，指向一个 NSObject 类型的常量（通常把这种指针叫做指向常量的指针，或者常量指针）<br>这样声明的结果是 object 本身可以修改，但是 object 指向的内容不能修改。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSObject</span> * <span class="keyword">const</span> object;</span><br></pre></td></tr></table></figure>
+<p>这里的 object 是一个常量，它的类型是一个指针（通常把这种类型叫做指针常量）<br>这样声明的结果是 object 本身不可以修改，但是 object 指向的内容可以修改。<br>但是因为 Objective-C 不支持对对象指针的解引用进行赋值，因此 object 指向的内容也无法修改。即 <code>*str1 = *str2;</code> 这类操作是不允许的。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="built_in">NSString</span> *str = <span class="string">@&quot;this is a string&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码中的 const 其实是毫无意义的。</p>
+<p>还有 object 本身和 object 指向的内容都不能修改的情况，即：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSObject</span> <span class="keyword">const</span> * <span class="keyword">const</span> object;</span><br></pre></td></tr></table></figure>
+
+<p>那么作为类比，对于 __strong 修饰符来说：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSObject</span> * __<span class="keyword">strong</span> o;</span><br><span class="line"><span class="built_in">NSObject</span> __<span class="keyword">strong</span> * o;</span><br></pre></td></tr></table></figure>
+
+<p>上面两句代码有什么区别？第二行中的 * 和 o 之间，日常开发时是不写空格的，这里只是为了对齐。</p>
+<h1 id="NSObject-strong-o-和-NSObject-strong-o-的区别"><a href="#NSObject-strong-o-和-NSObject-strong-o-的区别" class="headerlink" title="NSObject * __strong o; 和 NSObject __strong *o; 的区别"></a><code>NSObject * __strong o;</code> 和 <code>NSObject __strong *o;</code> 的区别</h1><h3 id="探索步骤1，转成-C-代码"><a href="#探索步骤1，转成-C-代码" class="headerlink" title="探索步骤1，转成 C++ 代码"></a>探索步骤1，转成 C++ 代码</h3><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> main(<span class="type">int</span> argc, <span class="keyword">const</span> <span class="type">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="built_in">NSObject</span> * __<span class="keyword">strong</span> o1;</span><br><span class="line">    <span class="built_in">NSObject</span> __<span class="keyword">strong</span> *o2;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将上面这个 main 函数转成 C++ 代码后的结果为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> * argv[])</span> </span>&#123;</span><br><span class="line">    NSObject __attribute__((<span class="built_in">objc_ownership</span>(strong))) *o1;</span><br><span class="line">    NSObject * __attribute__((<span class="built_in">objc_ownership</span>(strong))) o2;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看上去 <code>__strong</code> 被类似宏替换的操作替换成了 <code>__attribute__((objc_ownership(strong)))</code>，看不出什么东西。</p>
+<h3 id="探索步骤2，查看汇编代码"><a href="#探索步骤2，查看汇编代码" class="headerlink" title="探索步骤2，查看汇编代码"></a>探索步骤2，查看汇编代码</h3><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> main(<span class="type">int</span> argc, <span class="keyword">const</span> <span class="type">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="built_in">NSObject</span> * __<span class="keyword">strong</span> o1;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> main(<span class="type">int</span> argc, <span class="keyword">const</span> <span class="type">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="built_in">NSObject</span> __<span class="keyword">strong</span> *o2;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分别查看上面两个 main 函数的汇编代码，会发现结果都是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">XXXXXX`main:</span><br><span class="line">    0x100003ec4 &lt;+0&gt;:  sub    sp, sp, #0x30</span><br><span class="line">    0x100003ec8 &lt;+4&gt;:  stp    x29, x30, [sp, #0x20]</span><br><span class="line">    0x100003ecc &lt;+8&gt;:  add    x29, sp, #0x20</span><br><span class="line">    0x100003ed0 &lt;+12&gt;: stur   wzr, [x29, #-0x4]</span><br><span class="line">    0x100003ed4 &lt;+16&gt;: stur   w0, [x29, #-0x8]</span><br><span class="line">    0x100003ed8 &lt;+20&gt;: str    x1, [sp, #0x10]</span><br><span class="line">    0x100003edc &lt;+24&gt;: add    x0, sp, #0x8</span><br><span class="line">    0x100003ee0 &lt;+28&gt;: mov    x1, #0x0</span><br><span class="line">    0x100003ee4 &lt;+32&gt;: str    xzr, [sp, #0x8]</span><br><span class="line">    0x100003ee8 &lt;+36&gt;: stur   wzr, [x29, #-0x4]</span><br><span class="line">    0x100003eec &lt;+40&gt;: bl     0x100003f3c               ; symbol stub for: objc_storeStrong</span><br><span class="line">    0x100003ef0 &lt;+44&gt;: ldur   w0, [x29, #-0x4]</span><br><span class="line">    0x100003ef4 &lt;+48&gt;: ldp    x29, x30, [sp, #0x20]</span><br><span class="line">    0x100003ef8 &lt;+52&gt;: add    sp, sp, #0x30</span><br><span class="line">    0x100003efc &lt;+56&gt;: ret    </span><br></pre></td></tr></table></figure>
+
+<p>所以这两种顺序的写法的效果应该是一样的。</p>
+<p>所以其实：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSObject</span> * __<span class="keyword">strong</span> o;</span><br><span class="line"><span class="built_in">NSObject</span> __<span class="keyword">strong</span> *o;</span><br><span class="line">__<span class="keyword">strong</span> <span class="built_in">NSObject</span> *o</span><br></pre></td></tr></table></figure>
+
+<p>上面这三种写法都是一样的。</p>
+<p>对于另外三个修饰也都是一样，我们可以测试一下 <code>__autoreleasing</code> 修饰符。先随便创建一个类里面写上如下代码：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Cat</span></span></span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">instancetype</span>)cat &#123;</span><br><span class="line">    Cat *cat = [[Cat alloc] init];</span><br><span class="line">    <span class="keyword">return</span> cat;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)dealloc &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%s&quot;</span>, __func__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>然后编写 main 函数：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> main(<span class="type">int</span> argc, <span class="keyword">const</span> <span class="type">char</span> * argv[]) &#123;</span><br><span class="line">    Cat * __autoreleasing cat = <span class="literal">nil</span>;</span><br><span class="line">    <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">        cat = [Cat cat];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;outside of the autoreleasepool&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以发现，无论 <code>__autoreleasing</code> 写在哪个位置，都可以让 cat 对象在打印 outside of the autoreleasepool 之前就被销毁。</p>
+<p>所以对于一级指针，修饰符放在哪个位置都一样，那么对于二级指针呢？</p>
+<p>在探讨二级指针之前，先了解一下 <code>NSError * __autoreleasing *</code> 是什么意思，以及为什么这里要写成这样。</p>
+<h1 id="为什么-NSError-autoreleasing-要用二级指针？"><a href="#为什么-NSError-autoreleasing-要用二级指针？" class="headerlink" title="为什么 NSError * __autoreleasing * 要用二级指针？"></a>为什么 <code>NSError * __autoreleasing *</code> 要用二级指针？</h1><p>其实 <code>NSError * __autoreleasing *</code> 是 MRC（或者叫 MRR）时代的写法，在 ARC 时代，可以省去 <code>__autoreleasing</code> 修饰符，直接写成 <code>NSError **</code>，编译器会自动对某些变量设为 <code>__autoreleasing</code>。所以对于 ARC 的 <code>NSError **</code> 类型，编译器还是会把它处理成 <code>NSError * __autoreleasing *</code> 的语义。</p>
+<p>在 ARC 下，用 Xcode 的代码自动补全功能时，自动补全的代码还是会对这个类型给出 <code>NSError *__autoreleasing  _Nullable * _Nullable</code> 的提示。</p>
+<p>为了说明 <code>NSError * __autoreleasing *</code> 的含义，首先要先明白这里为什么要用二级指针。</p>
+<p>举一个经常使用的 API，NSJSONSerialization 的例子：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">nullable</span> <span class="type">id</span>)JSONObjectWithData:(<span class="built_in">NSData</span> *)data options:(<span class="built_in">NSJSONReadingOptions</span>)opt error:(<span class="built_in">NSError</span> **)error;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法的 error 参数用来在解析失败的时候提供具体错误信息，需要这么来使用它：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSError</span> *error = <span class="literal">nil</span>;</span><br><span class="line">[<span class="built_in">NSJSONSerialization</span> JSONObjectWithData:data options:kNilOptions error:&amp;error];</span><br></pre></td></tr></table></figure>
+
+<p>这里的 error 参数是一个输出参数，它输出的是一个包含错误信息的 NSError 对象。<br>输出参数必须是一个指针，如果不是指针，参数就是值传递，函数对参数的修改无法作用到函数外部。</p>
+<p>那为什么不用一级指针？</p>
+<p>首先先看一下 NSError 这个类的公共属性，会发现都是 readonly 的，也就是说 NSError 是一个不可变对象，它包含的信息在创建对象的时候就确定了，不能再更改。因此这个对象必须由 <code>JSONObjectWithData:options:error:</code> 这个方法内部实现来创建，不能由调用方创建。</p>
+<p>如果这里用一级指针，由于调用方不能创建 NSError 对象，且 Objective-C 不允许在栈上给对象分配内存空间，下面这种写法是不可以的：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSError</span> error;</span><br><span class="line">[<span class="built_in">NSJSONSerialization</span> JSONObjectWithData:data options:kNilOptions error:&amp;error];</span><br></pre></td></tr></table></figure>
+
+<p>只能这么写：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSError</span> *error = <span class="literal">nil</span>;</span><br><span class="line">[<span class="built_in">NSJSONSerialization</span> JSONObjectWithData:data options:kNilOptions error:error];</span><br></pre></td></tr></table></figure>
+
+<p>这么写的结果是给 error 参数传递了一个 nil 值。于是 <code>JSONObjectWithData:options:error:</code> 的内部实现在创建 NSError 对象时，不知道应该把它创建在哪个地址上，导致调用方也无法接收到这个对象。</p>
+<p>所以下面这种标准写法：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSError</span> *error = <span class="literal">nil</span>;</span><br><span class="line">[<span class="built_in">NSJSONSerialization</span> JSONObjectWithData:data options:kNilOptions error:&amp;error];</span><br></pre></td></tr></table></figure>
+
+<p>的实际含义是：</p>
+<ol>
+<li>在栈上创建了一个指针叫 error，指向的类型是 NSError，并把指针指向的位置初始化为 nil。</li>
+<li>用 <code>&amp;error</code> 获取这个指针本身在栈上的地址，它是有值的，传给 error 参数的值不是 nil。</li>
+<li><code>JSONObjectWithData:options:error:</code> 方法的内部在堆上创建一个 NSError 对象，并把传入的栈上的地址指向这个 NSError 对象。</li>
+<li>调用方就可以通过 error 变量得到这个 NSError 对象了。</li>
+</ol>
+<p>所以这里为什么要用二级指针应该解释清楚了。</p>
+<h1 id="NSError-autoreleasing-中-autoreleasing-修饰符的位置"><a href="#NSError-autoreleasing-中-autoreleasing-修饰符的位置" class="headerlink" title="NSError * __autoreleasing * 中 __autoreleasing 修饰符的位置"></a><code>NSError * __autoreleasing *</code> 中 <code>__autoreleasing</code> 修饰符的位置</h1><p>现在来探索一下 <code>__autoreleasing</code> 修饰符为什么要写在两个星号中间。</p>
+<p>假设定义一个二级指针的变量：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cat *cat = [Cat cat];</span><br><span class="line">Cat **p = &amp;cat;</span><br></pre></td></tr></table></figure>
+
+<p>如果直接上面这样写，编译器会报错 Pointer to non-const type ‘Cat *’ with no explicit ownership，意思是有一个指针没有显式地指定拥有关系，从这句话来理解，这里的指针是二级指针的内层指针。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cat *cat = [Cat cat];</span><br><span class="line">Cat ** __<span class="keyword">strong</span> p = &amp;cat;</span><br></pre></td></tr></table></figure>
+
+<p>把代码改成上面代码，编译后依然报相同的错误，所以可以得出结论，在两个星号右边写修饰符，修饰的可能是外层指针。外层指针的具体修饰情况后面再讨论。</p>
+<p>于是把 <code>__strong</code> 往左边移动一个星星。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cat *cat = [Cat cat];</span><br><span class="line">Cat * __<span class="keyword">strong</span> *p = &amp;cat;</span><br></pre></td></tr></table></figure>
+
+<p>编译通过，可以正常运行。</p>
+<p>再改变 <code>__strong</code> 的位置做几次尝试：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cat *cat = [Cat cat];</span><br><span class="line">Cat __<span class="keyword">strong</span> **p = &amp;cat;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cat *cat = [Cat cat];</span><br><span class="line">__<span class="keyword">strong</span> Cat **p = &amp;cat;</span><br></pre></td></tr></table></figure>
+
+<p>发现都可以正常编译运行，所以：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Cat * __<span class="keyword">strong</span> *p;</span><br><span class="line">Cat __<span class="keyword">strong</span> **p</span><br><span class="line">__<span class="keyword">strong</span> Cat **p</span><br></pre></td></tr></table></figure>
+
+<p>这三种写法的效果是一样的，修饰符都是在修饰内层指针。<br>那为什么苹果自己要把 <code>__autoreleasing</code> 写在两个星星中间呢？可能是苹果自己的一种习惯或编码规范吧。</p>
+<p>上面用 <code>__strong</code> 来举例是为了代码简洁，实际上如果要使用 <code>__autoreleasing</code>, cat 本身也要指明是 <code>__autoreleasing</code>。原因应该大家都清楚。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Cat * __autoreleasing cat = [Cat cat];</span><br><span class="line">Cat * __autoreleasing *p = &amp;cat;</span><br></pre></td></tr></table></figure>
+
+<h1 id="对于二级指针外层指针的拥有关系的修饰"><a href="#对于二级指针外层指针的拥有关系的修饰" class="headerlink" title="对于二级指针外层指针的拥有关系的修饰"></a>对于二级指针外层指针的拥有关系的修饰</h1><p>那么外层指针的拥有关系，会想到如果是下面的代码会发生什么呢？</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Cat * __<span class="keyword">strong</span> * __<span class="keyword">weak</span> p = <span class="literal">nil</span>;</span><br><span class="line">&#123;</span><br><span class="line">    Cat *cat = [Cat cat];</span><br><span class="line">    p = &amp;cat;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, *p);</span><br></pre></td></tr></table></figure>
+
+<p>结果打印 (null)，似乎是合理的，weak 指针会在指向的对象释放自动至为 nil。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Cat * __<span class="keyword">strong</span> * __<span class="keyword">strong</span> p = <span class="literal">nil</span>;</span><br><span class="line">&#123;</span><br><span class="line">    Cat *cat = [Cat cat];</span><br><span class="line">    p = &amp;cat;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, *p);</span><br></pre></td></tr></table></figure>
+
+<p>那么这样呢，运行代码，发现结果还是 (null）。为啥？？？</p>
+<p>其实上面两个代码在运行时编译器都会报出警告，<code>__strong&#39; only applies to Objective-C object or block pointer types; type here is &#39;Cat *__strong *&#39;</code>。意思是说修饰符只支持指向 OC 对象或者 Block 的指针类型。</p>
+<p>二级指针的外层指针（其实就是二级指针本身）指向的是一个指针，并不是 OC 对象或 Block。这里编译器会忽略对外层指针的修饰符，实际上类型还是 <code>Cat * __strong *</code>。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Objective-C/" rel="tag"># Objective-C</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/ios-architect-discuss/" rel="next" title="iOS 架构小谈">
+                <i class="fa fa-chevron-left"></i> iOS 架构小谈
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/codable-usage-and-theory/" rel="prev" title="详解 Codable 的用法和原理">
+                详解 Codable 的用法和原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NSObject-strong-o-%E5%92%8C-NSObject-strong-o-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.</span> <span class="nav-text">NSObject * __strong o; 和 NSObject __strong *o; 的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A2%E7%B4%A2%E6%AD%A5%E9%AA%A41%EF%BC%8C%E8%BD%AC%E6%88%90-C-%E4%BB%A3%E7%A0%81"><span class="nav-number">2.0.1.</span> <span class="nav-text">探索步骤1，转成 C++ 代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A2%E7%B4%A2%E6%AD%A5%E9%AA%A42%EF%BC%8C%E6%9F%A5%E7%9C%8B%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81"><span class="nav-number">2.0.2.</span> <span class="nav-text">探索步骤2，查看汇编代码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-NSError-autoreleasing-%E8%A6%81%E7%94%A8%E4%BA%8C%E7%BA%A7%E6%8C%87%E9%92%88%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">为什么 NSError * __autoreleasing * 要用二级指针？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NSError-autoreleasing-%E4%B8%AD-autoreleasing-%E4%BF%AE%E9%A5%B0%E7%AC%A6%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">NSError * __autoreleasing * 中 __autoreleasing 修饰符的位置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E%E4%BA%8C%E7%BA%A7%E6%8C%87%E9%92%88%E5%A4%96%E5%B1%82%E6%8C%87%E9%92%88%E7%9A%84%E6%8B%A5%E6%9C%89%E5%85%B3%E7%B3%BB%E7%9A%84%E4%BF%AE%E9%A5%B0"><span class="nav-number">5.</span> <span class="nav-text">对于二级指针外层指针的拥有关系的修饰</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">晨曦微光</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">146k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点总阅读时长">2:26</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.2</div>
+
+
+<div>Hosted by <a target="_blank" rel="noopener" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'krbUxLGKWA6SjK4bKeeJcu8Q-gzGzoHsz',
+        appKey: 'G2GNz7MLppJZuew6PZbdiZhf',
+        placeholder: '填写评论内容',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("nGSnOI7jqHLeho9asFx6j3b9-gzGzoHsz", "r6e5CNQIXNTbVb7KFX4R5rxk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="JavaScriptCore," />
+
+
+<meta name="description" content="JavaScriptCore 初探在 iOS7 之前，原生应用和 Web 应用之间很难通信。如果你想在 iOS 设备上渲染 HTML 或者运行 JavaScript，你不得不使用UIWebView。iOS7 引入了JavaScriptCore，功能更强大，使用更简单。 JavaScriptCore 介绍JavaScriptCore是封装了 JavaScript 和 Objective-C 桥接的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScriptCore 初探">
+<meta property="og:url" content="https://liuduoios.github.io/2015/10/24/JavaScriptCore%E5%88%9D%E6%8E%A2/index.html">
+<meta property="og:site_name" content="My Knowledge Library">
+<meta property="og:description" content="JavaScriptCore 初探在 iOS7 之前，原生应用和 Web 应用之间很难通信。如果你想在 iOS 设备上渲染 HTML 或者运行 JavaScript，你不得不使用UIWebView。iOS7 引入了JavaScriptCore，功能更强大，使用更简单。 JavaScriptCore 介绍JavaScriptCore是封装了 JavaScript 和 Objective-C 桥接的">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-10-24T14:42:30.000Z">
+<meta property="article:modified_time" content="2023-06-05T05:33:26.594Z">
+<meta property="article:author" content="晨曦微光">
+<meta property="article:tag" content="JavaScriptCore">
+<meta name="twitter:card" content="summary">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="My Knowledge Library" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://liuduoios.github.io/2015/10/24/JavaScriptCore初探/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>JavaScriptCore 初探 | My Knowledge Library</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">My Knowledge Library</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">个人博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/2015/10/24/JavaScriptCore%E5%88%9D%E6%8E%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My Knowledge Library">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JavaScriptCore 初探</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-10-24T22:42:30+08:00">2015-10-24</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/10/24/JavaScriptCore%E5%88%9D%E6%8E%A2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2015/10/24/JavaScriptCore%E5%88%9D%E6%8E%A2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/10/24/JavaScriptCore%E5%88%9D%E6%8E%A2/" class="leancloud_visitors" data-flag-title="JavaScriptCore 初探">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">21k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">21 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="JavaScriptCore-初探"><a href="#JavaScriptCore-初探" class="headerlink" title="JavaScriptCore 初探"></a>JavaScriptCore 初探</h1><p>在 iOS7 之前，原生应用和 Web 应用之间很难通信。如果你想在 iOS 设备上渲染 HTML 或者运行 JavaScript，你不得不使用<code>UIWebView</code>。iOS7 引入了<code>JavaScriptCore</code>，功能更强大，使用更简单。</p>
+<h2 id="JavaScriptCore-介绍"><a href="#JavaScriptCore-介绍" class="headerlink" title="JavaScriptCore 介绍"></a>JavaScriptCore 介绍</h2><p><code>JavaScriptCore</code>是封装了 JavaScript 和 Objective-C 桥接的 Objective-C API，只要用很少的代码，就可以做到 JavaScript 调用 Objective-C，或者 Objective-C 调用 JavaScript。</p>
+<p>在之前的 iOS 版本，你只能通过向 UIWebView 发送<code>stringByEvaluatingJavaScriptFromString:</code>消息来执行一段JavaScript脚本。并且如果想用 JavaScript 调用 Objective-C，必须打开一个自定义的Scheme（例如：foo:&#x2F;&#x2F;），然后在 UIWebView 的 delegate 方法<code>webView:shouldStartLoadWithRequest:navigationType</code>中进行处理。</p>
+<h4 id="然而现在可以利用-JavaScriptCore-的先进功能了，它可以："><a href="#然而现在可以利用-JavaScriptCore-的先进功能了，它可以：" class="headerlink" title="然而现在可以利用 JavaScriptCore 的先进功能了，它可以："></a>然而现在可以利用 JavaScriptCore 的先进功能了，它可以：</h4><ul>
+<li>运行 JavaScript 脚本而不需要依赖UIWebView  </li>
+<li>使用现代 Objective-C 的语法（例如 Blocks 和下标）</li>
+<li>在 Objective-C 和 JavaScript 之间无缝的传递值或者对象</li>
+<li>创建混合对象（原生对象可以将 JavaScript 值或函数作为一个属性）</li>
+</ul>
+<h4 id="使用-Objective-C-和-JavaScript-结合开发的好处："><a href="#使用-Objective-C-和-JavaScript-结合开发的好处：" class="headerlink" title="使用 Objective-C 和 JavaScript 结合开发的好处："></a>使用 Objective-C 和 JavaScript 结合开发的好处：</h4><ul>
+<li><strong>快速的开发和制作原型</strong>：<br>如果某块区域的业务需求变化的非常频繁，那么可以用 JavaScript 来开发和制作原型，这比Objective-C效率更高。  </li>
+<li><strong>团队职责划分</strong>：  </li>
+<li><strong>JavaScript 是解释型语言</strong>：<br>JavaScript 是解释运行的，你可以实时的修改 JavaScript 代码并立即看到结果。</li>
+</ul>
+<h2 id="JavaScriptCore-概述"><a href="#JavaScriptCore-概述" class="headerlink" title="JavaScriptCore 概述"></a>JavaScriptCore 概述</h2><p><strong>JSValue</strong>: 代表一个JavaScript实体，一个JSValue可以表示很多JavaScript原始类型例如boolean, integers, doubles，甚至包括对象和函数。<br><strong>JSManagedValue</strong>: 本质上是一个JSValue，但是可以处理内存管理中的一些特殊情形，它能帮助引用技术和垃圾回收这两种内存管理机制之间进行正确的转换。<br><strong>JSContext</strong>: 代表JavaScript的运行环境，你需要用JSContext来执行JavaScript代码。所有的JSValue都是捆绑在一个JSContext上的。<br><strong>JSExport</strong>: 这是一个协议，可以用这个协议来将原生对象导出给JavaScript，这样原生对象的属性或方法就成为了JavaScript的属性或方法，非常神奇。<br><strong>JSVirtualMachine</strong>: 代表一个对象空间，拥有自己的堆结构和垃圾回收机制。大部分情况下不需要和它直接交互，除非要处理一些特殊的多线程或者内存管理问题。</p>
+<h2 id="JSContext-x2F-JSValue"><a href="#JSContext-x2F-JSValue" class="headerlink" title="JSContext &#x2F; JSValue"></a>JSContext &#x2F; JSValue</h2><p><code>JSVirtualMachine</code>为JavaScript的运行提供了底层资源，<code>JSContext</code>为JavaScript提供运行环境，通过</p>
+<pre><code>- (JSValue *)evaluateScript:(NSString *)script;
+</code></pre>
+<p>方法就可以执行一段 JavaScript 脚本，并且如果其中有方法、变量等信息都会被存储在其中以便在需要的时候使用。<br>而JSContext的创建都是基于 JSVirtualMachine：</p>
+<pre><code>- (id)initWithVirtualMachine:(JSVirtualMachine *)virtualMachine;
+</code></pre>
+<p>如果是使用<code>- (id)init;</code>进行初始化，那么在其内部会自动创建一个新的JSVirtualMachine对象然后调用前边的初始化方法。</p>
+<p>创建一个 JSContext 后，可以很容易地运行 JavaScript 代码来创建变量，做计算，甚至定义方法：</p>
+<pre><code>JSContext *context = [[JSContext alloc] init];
+[context evaluateScript:@&quot;var num = 5 + 5&quot;];
+[context evaluateScript:@&quot;var names = [&#39;Grace&#39;, &#39;Ada&#39;, &#39;Margaret&#39;]&quot;];
+[context evaluateScript:@&quot;var triple = function(value) &#123; return value * 3 &#125;&quot;];
+JSValue *tripleNum = [context evaluateScript:@&quot;triple(num)&quot;];
+</code></pre>
+<p>任何出自 JSContext 的值都被可以被包裹在一个 JSValue 对象中，JSValue 包装了每一个可能的 JavaScript 值：字符串和数字；数组、对象和方法；甚至错误和特殊的 JavaScript 值诸如 null 和 undefined。</p>
+<p>可以对JSValue调用<code>toString</code>、<code>toBool</code>、<code>toDouble</code>、<code>toArray</code>等等方法把它转换成合适的Objective-C值或对象。</p>
+<h2 id="Objective-C-调用-JavaScript"><a href="#Objective-C-调用-JavaScript" class="headerlink" title="Objective-C 调用 JavaScript"></a>Objective-C 调用 JavaScript</h2><p>例如有一个 “Hello.js” 文件内容如下：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function printHello() &#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 Objective-C 中调用 printHello 方法：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSString</span> *scriptPath = [[<span class="built_in">NSBundle</span> mainBundle] pathForResource:<span class="string">@&quot;hello&quot;</span> ofType:<span class="string">@&quot;js&quot;</span>];</span><br><span class="line"><span class="built_in">NSString</span> *scriptString = [<span class="built_in">NSString</span> stringWithContentsOfFile:scriptPath encoding:<span class="built_in">NSUTF8StringEncoding</span> error:<span class="literal">nil</span>];</span><br><span class="line"></span><br><span class="line">JSContext *context = [[JSContext alloc] init];</span><br><span class="line">[context evaluateScript:scriptString];</span><br><span class="line"></span><br><span class="line">JSValue *function = <span class="keyword">self</span>.context[<span class="string">@&quot;printHello&quot;</span>];</span><br><span class="line">[function callWithArguments:@[]];</span><br></pre></td></tr></table></figure>
+<p>分析以上代码：</p>
+<p>首先初始化了一个 JSContext，并执行 JavaScript 脚本，此时 printHello 函数并没有被调用，只是被读取到了这个 context中。</p>
+<p>然后从 context 中取出对 printHello 函数的引用，并保存到一个JSValue中。</p>
+<p>注意这里，从 JSContext 中取出一个 JavaScript 实体（值、函数、对象），和将一个实体保存到JSContext中，语法均与NSDictionary的取值存值类似，非常简单。</p>
+<p>最后如果JSValue是一个JavaScript函数，可以用callWithArguments来调用，参数是一个数组，如果没有参数则传入空数组@[]。</p>
+<h2 id="JavaScript-调用-Objective-C"><a href="#JavaScript-调用-Objective-C" class="headerlink" title="JavaScript 调用 Objective-C"></a>JavaScript 调用 Objective-C</h2><p>还是上面的例子，将 “hello.js” 的内容改为：</p>
+<pre><code>function printHello() &#123;
+    print(&quot;Hello, World!&quot;);
+&#125;
+</code></pre>
+<p>这里的 print 函数用 Objective-C 代码来实现</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">JSContext *context = [[JSContext alloc] init];</span><br><span class="line">[context evaluateScript:scriptString];</span><br><span class="line"></span><br><span class="line"><span class="keyword">self</span>.context[<span class="string">@&quot;print&quot;</span>] = ^(<span class="built_in">NSString</span> *text) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, text<span class="string">&quot;);</span></span><br><span class="line"><span class="string">&#125;;</span></span><br><span class="line"><span class="string">          </span></span><br><span class="line"><span class="string">JSValue *function = self.context[@&quot;</span>printHello<span class="string">&quot;];</span></span><br><span class="line"><span class="string">[function callWithArguments:@[]];	</span></span><br></pre></td></tr></table></figure>
+<p>这里将一个Block以”print”为名传递给JavaScript上下文，JavaScript中调用print函数就可以执行这个Objective-C Block。</p>
+<p>注意这里 JavaScript 中的字符串可以无缝的桥接为NSString，实参”Hello, World!”被传递给了NSString类型的text形参。</p>
+<h2 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h2><p>当JavaScript运行时出现异常，会回调JSContext的exceptionHandler中设置的Block</p>
+<pre><code>context.exceptionHandler = ^(JSContext *context, JSValue *exception) &#123;
+       NSLog(@&quot;JS Error: %@&quot;, exception);
+&#125;;
+
+[context evaluateScript:@&quot;function multiply(value1, value2) &#123; return value1 * value2 &quot;];
+// 此时会打印Log &quot;JS Error: SyntaxError: Unexpected end of script&quot;
+</code></pre>
+<h2 id="JSExport"><a href="#JSExport" class="headerlink" title="JSExport"></a>JSExport</h2><p>JSExport是一个协议，可以让原生类的属性或方法称为JavaScript的属性或方法。</p>
+<p>看下面的例子：</p>
+<pre><code>@protocol ItemExport &lt;JSExport&gt;
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) NSString *description;
+@end
+
+@interface Item : NSObject &lt;ItemExport&gt;
+@property (strong, nonatomic) NSString *name;
+@property (strong, nonatomic) NSString *description;
+@end
+</code></pre>
+<p>注意Item类不去直接符合JSExport，而是符合一个自己的协议，这个协议去继承JSExport协议。</p>
+<p>例如有如下JavaScript代码</p>
+<pre><code>function Item(name, description) &#123;
+    this.name = name;
+    this.description = description;
+&#125;
+
+var items = [];
+
+function addItem(item) &#123;
+    items.push(item);
+&#125;
+</code></pre>
+<p>可以在Objective-C中把Item对象传递给addItem函数</p>
+<pre><code>Item *item = [[Item alloc] init];
+item.name = @&quot;itemName&quot;;
+item.description = @&quot;itemDescription&quot;;
+
+JSValue *function = context[@&quot;addItem&quot;];
+[function callWithArguments:@[item]];
+</code></pre>
+<p>或者把Item类导出到JavaScript环境，等待稍后使用</p>
+<pre><code>[self.context setObject:Item.self forKeyedSubscript:@&quot;Item&quot;];
+</code></pre>
+<h2 id="内存管理陷阱"><a href="#内存管理陷阱" class="headerlink" title="内存管理陷阱"></a>内存管理陷阱</h2><p>Objective-C的内存管理机制是引用技术，JavaScript的内存管理机制是垃圾回收。在大部分情况下，JavaScriptCore能做到在这两种内存管理机制之间无缝无错转换，但也有少数情况需要特别注意。</p>
+<h3 id="在-block-内捕获-JSContext"><a href="#在-block-内捕获-JSContext" class="headerlink" title="在 block 内捕获 JSContext"></a>在 block 内捕获 JSContext</h3><p>Block 会为默认为所有被它捕获的对象创建一个强引用。JSContext为它管理的所有JSValue也都拥有一个强引用。并且，JSValue会为它保存的值和它所在的 Context 都维持一个强引用。这样 JSContext 和 JSValue 看上去是循环引用的，然而并不会，垃圾回收机制会打破这个循环引用。</p>
+<p>看下面的例子：</p>
+<pre><code>self.context[@&quot;getVersion&quot;] = ^&#123;
+    NSString* versionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@&quot;CFBundleShortVersionString&quot;];
+    
+    versionString = [@&quot;Xork version &quot; stringByAppendingString:versionString];
+    
+    JSContext *context = [JSContext currentContext]; // 这里不要用self.context
+    JSValue *version = [JSValue valueWithObject:versionString inContext:context];
+    
+    return version;
+&#125;;
+</code></pre>
+<p>使用[JSContext currentContext]而不是self.context来在block中使用JSContext</p>
+<h3 id="JSManagedValue"><a href="#JSManagedValue" class="headerlink" title="JSManagedValue"></a>JSManagedValue</h3><p>当把一个JavaScript值保存到一个本地实例变量上时，需要尤其注意内存管理陷阱。<br>用实例变量保存一个JSValue非常容易引起循环引用。</p>
+<p>看以下下例子，自定义一个UIAlertView，当点击按钮时调用一个JavaScript函数：</p>
+<pre><code>#import &lt;UIKit/UIKit.h&gt;
+#import &lt;JavaScriptCore/JavaScriptCore.h&gt;
+
+@interface MyAlertView : UIAlertView
+
+- (id)initWithTitle:(NSString *)title
+            message:(NSString *)message
+            success:(JSValue *)successHandler
+            failure:(JSValue *)failureHandler
+            context:(JSContext *)context;
+
+@end
+</code></pre>
+<p>按照一般自定义AlertView的实现方法，MyAlertView需要持有successHandler，failureHandler这两个JSValue对象</p>
+<p>向JavaScript环境注入一个function</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span>.context[<span class="string">@&quot;presentNativeAlert&quot;</span>] = ^(<span class="built_in">NSString</span> *title,</span><br><span class="line">                                        <span class="built_in">NSString</span> *message,</span><br><span class="line">                                        JSValue *success,</span><br><span class="line">                                        JSValue *failure) &#123;</span><br><span class="line">    JSContext *context = [JSContext currentContext];</span><br><span class="line">    MyAlertView *alertView = [[MyAlertView alloc] initWithTitle:title</span><br><span class="line">                                                        message:message</span><br><span class="line">                                                        success:success</span><br><span class="line">                                                        failure:failure</span><br><span class="line">                                                        context:context];</span><br><span class="line">    [alertView show];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>因为JavaScript环境中都是“强引用”（相对Objective-C的概念来说）的，这时JSContext强引用了一个presentNativeAlert函数，这个函数中又强引用了MyAlertView<br>等于说JSContext强引用了MyAlertView，而MyAlertView为了持有两个回调强引用了successHandler和failureHandler这两个JSValue，而JSValue又是强引用JSContext的，循环引用便出现了。</p>
+<p>所以苹果提供了一个JSMagagedValue类来解决这个问题。</p>
+<p>看MyAlertView.m的正确实现：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="string">&quot;MyAlertView.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">XorkAlertView</span>() &lt;<span class="title">UIAlertViewDelegate</span>&gt;</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">strong</span>, <span class="keyword">nonatomic</span>) JSContext *ctxt;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">strong</span>, <span class="keyword">nonatomic</span>) JSMagagedValue *successHandler;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">strong</span>, <span class="keyword">nonatomic</span>) JSMagagedValue *failureHandler;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">MyAlertView</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="type">id</span>)initWithTitle:(<span class="built_in">NSString</span> *)title</span><br><span class="line">            message:(<span class="built_in">NSString</span> *)message</span><br><span class="line">            success:(JSValue *)successHandler</span><br><span class="line">            failure:(JSValue *)failureHandler</span><br><span class="line">            context:(JSContext *)context &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">self</span> = [<span class="variable language_">super</span> initWithTitle:title</span><br><span class="line">                        message:message</span><br><span class="line">                       delegate:<span class="keyword">self</span></span><br><span class="line">              cancelButtonTitle:<span class="string">@&quot;No&quot;</span></span><br><span class="line">              otherButtonTitles:<span class="string">@&quot;Yes&quot;</span>, <span class="literal">nil</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        _ctxt = context;</span><br><span class="line">        </span><br><span class="line">        _successHandler = [JSManagedValue managedValueWithValue:successHandler];</span><br><span class="line">        <span class="comment">// A JSManagedValue by itself is a weak reference. You convert it into a conditionally retained</span></span><br><span class="line">        <span class="comment">// reference, by inserting it to the JSVirtualMachine using addManagedReference:withOwner:</span></span><br><span class="line">        [context.virtualMachine addManagedReference:_successHandler withOwner:<span class="keyword">self</span>];</span><br><span class="line">        </span><br><span class="line">        _failureHandler = [JSManagedValue managedValueWithValue:failureHandler];</span><br><span class="line">        [context.virtualMachine addManagedReference:_failureHandler withOwner:<span class="keyword">self</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)alertView:(<span class="built_in">UIAlertView</span> *)alertView clickedButtonAtIndex:(<span class="built_in">NSInteger</span>)buttonIndex &#123;</span><br><span class="line">    <span class="keyword">if</span> (buttonIndex == <span class="keyword">self</span>.cancelButtonIndex) &#123;</span><br><span class="line">        JSValue *function = [<span class="keyword">self</span>.failureHandler value];</span><br><span class="line">        [function callWithArguments:@[]];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        JSValue *function = [<span class="keyword">self</span>.successHandler value];</span><br><span class="line">        [function callWithArguments:@[]];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    [<span class="keyword">self</span>.ctxt.virtualMachine removeManagedReference:_failureHandler withOwner:<span class="keyword">self</span>];</span><br><span class="line">    [<span class="keyword">self</span>.ctxt.virtualMachine removeManagedReference:_successHandler withOwner:<span class="keyword">self</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>分析上面例子，从外部传入的JSValue对象在类内部使用JSManagedValue来保存。</p>
+<p>JSManagedValue本身是一个弱引用对象，需要调用JSVirtualMachine的<code>addManagedReference:withOwner:</code>把它添加到JSVirtualMachine对象中，确保使用过程中JSValue不会被释放</p>
+<p>当用户点击AlertView上的按钮时，根据用户点击哪一个按钮，来执行对应的处理函数，这时AlertView也随即被销毁。<br>这时需要手动调用<code>removeManagedReference:withOwner:</code>来移除JSManagedValue。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>《iOS 7 by tutorials》</li>
+<li><a target="_blank" rel="noopener" href="https://www.bignerdranch.com/blog/javascriptcore-and-ios-7/">https://www.bignerdranch.com/blog/javascriptcore-and-ios-7/</a></li>
+<li><a target="_blank" rel="noopener" href="http://nshipster.com/javascriptcore/">http://nshipster.com/javascriptcore/</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/Jobot/JSCoreByExample">https://github.com/Jobot/JSCoreByExample</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/TheHolyGrail/Zoot">https://github.com/TheHolyGrail/Zoot</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScriptCore/" rel="tag"># JavaScriptCore</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/24/Swift-2-%E4%B8%AD%E7%9A%84%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%E5%85%B3%E9%94%AE%E5%AD%97-testable/" rel="next" title="Swift 2 中的单元测试关键字 @testable">
+                <i class="fa fa-chevron-left"></i> Swift 2 中的单元测试关键字 @testable
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/26/MVVM%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5/" rel="prev" title="MVVM核心概念">
+                MVVM核心概念 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JavaScriptCore-%E5%88%9D%E6%8E%A2"><span class="nav-number">1.</span> <span class="nav-text">JavaScriptCore 初探</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JavaScriptCore-%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.1.</span> <span class="nav-text">JavaScriptCore 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%84%B6%E8%80%8C%E7%8E%B0%E5%9C%A8%E5%8F%AF%E4%BB%A5%E5%88%A9%E7%94%A8-JavaScriptCore-%E7%9A%84%E5%85%88%E8%BF%9B%E5%8A%9F%E8%83%BD%E4%BA%86%EF%BC%8C%E5%AE%83%E5%8F%AF%E4%BB%A5%EF%BC%9A"><span class="nav-number">1.1.0.1.</span> <span class="nav-text">然而现在可以利用 JavaScriptCore 的先进功能了，它可以：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Objective-C-%E5%92%8C-JavaScript-%E7%BB%93%E5%90%88%E5%BC%80%E5%8F%91%E7%9A%84%E5%A5%BD%E5%A4%84%EF%BC%9A"><span class="nav-number">1.1.0.2.</span> <span class="nav-text">使用 Objective-C 和 JavaScript 结合开发的好处：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JavaScriptCore-%E6%A6%82%E8%BF%B0"><span class="nav-number">1.2.</span> <span class="nav-text">JavaScriptCore 概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JSContext-x2F-JSValue"><span class="nav-number">1.3.</span> <span class="nav-text">JSContext &#x2F; JSValue</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Objective-C-%E8%B0%83%E7%94%A8-JavaScript"><span class="nav-number">1.4.</span> <span class="nav-text">Objective-C 调用 JavaScript</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JavaScript-%E8%B0%83%E7%94%A8-Objective-C"><span class="nav-number">1.5.</span> <span class="nav-text">JavaScript 调用 Objective-C</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">1.6.</span> <span class="nav-text">异常处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JSExport"><span class="nav-number">1.7.</span> <span class="nav-text">JSExport</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E9%99%B7%E9%98%B1"><span class="nav-number">1.8.</span> <span class="nav-text">内存管理陷阱</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-block-%E5%86%85%E6%8D%95%E8%8E%B7-JSContext"><span class="nav-number">1.8.1.</span> <span class="nav-text">在 block 内捕获 JSContext</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JSManagedValue"><span class="nav-number">1.8.2.</span> <span class="nav-text">JSManagedValue</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">1.9.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">晨曦微光</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">146k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点总阅读时长">2:26</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.2</div>
+
+
+<div>Hosted by <a target="_blank" rel="noopener" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'krbUxLGKWA6SjK4bKeeJcu8Q-gzGzoHsz',
+        appKey: 'G2GNz7MLppJZuew6PZbdiZhf',
+        placeholder: '填写评论内容',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("nGSnOI7jqHLeho9asFx6j3b9-gzGzoHsz", "r6e5CNQIXNTbVb7KFX4R5rxk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

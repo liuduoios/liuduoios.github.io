@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta name="description" content="Selector在日常开发中，会经常接触到 Selector，例如常用到的 Target-Action 模式中，Action 就是一个 Selector 类型。所以 Selector 大家想必都很熟悉。 Selector 是一个字符串，用于指代某个类方法或实例方法。 例如一个类有下面两个方法： 12- (NSString *)description;- (NSInteger)addNumber1:">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Objective-C Runtime（一）：Selector 和方法签名">
+<meta property="og:url" content="https://liuduoios.github.io/objective-c-runtime-1-selector-and-method-signature/index.html">
+<meta property="og:site_name" content="My Knowledge Library">
+<meta property="og:description" content="Selector在日常开发中，会经常接触到 Selector，例如常用到的 Target-Action 模式中，Action 就是一个 Selector 类型。所以 Selector 大家想必都很熟悉。 Selector 是一个字符串，用于指代某个类方法或实例方法。 例如一个类有下面两个方法： 12- (NSString *)description;- (NSInteger)addNumber1:">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-01-31T12:32:39.000Z">
+<meta property="article:modified_time" content="2023-06-05T05:33:26.595Z">
+<meta property="article:author" content="晨曦微光">
+<meta name="twitter:card" content="summary">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="My Knowledge Library" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://liuduoios.github.io/objective-c-runtime-1-selector-and-method-signature/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Objective-C Runtime（一）：Selector 和方法签名 | My Knowledge Library</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">My Knowledge Library</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">个人博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/objective-c-runtime-1-selector-and-method-signature/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My Knowledge Library">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Objective-C Runtime（一）：Selector 和方法签名</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-31T20:32:39+08:00">2018-01-31</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/objective-c-runtime-1-selector-and-method-signature/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/objective-c-runtime-1-selector-and-method-signature/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/objective-c-runtime-1-selector-and-method-signature/" class="leancloud_visitors" data-flag-title="Objective-C Runtime（一）：Selector 和方法签名">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">6.6k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">7 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="Selector"><a href="#Selector" class="headerlink" title="Selector"></a>Selector</h3><p>在日常开发中，会经常接触到 Selector，例如常用到的 Target-Action 模式中，Action 就是一个 Selector 类型。所以 Selector 大家想必都很熟悉。</p>
+<p>Selector 是一个<strong>字符串</strong>，用于指代某个类方法或实例方法。</p>
+<p>例如一个类有下面两个方法：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">NSString</span> *)description;</span><br><span class="line">- (<span class="built_in">NSInteger</span>)addNumber1:(<span class="built_in">NSInteger</span>)number1 andNumber2:(<span class="built_in">NSInteger</span>)number2;</span><br></pre></td></tr></table></figure>
+
+<p>他们的选择器分别为：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;description&quot;</span></span><br><span class="line"><span class="string">&quot;addNumber1:andNumber2:&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>对于有两个或两个以上参数的方法，如果某个参数的名称为空，那么方法的 Selector 的对应部分也为空。例如：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">NSInteger</span>)add:(<span class="built_in">NSInteger</span>)number1 :(<span class="built_in">NSInteger</span>)number2;</span><br></pre></td></tr></table></figure>
+
+<p>上面方法的 Selector 为：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;add::&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>Selector 可以被发送给某个对象或类来进行方法调用，这时被发送的 Selector 需要带上输入参数。例如：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[calculator addNumber1:<span class="number">40</span> andNumber:<span class="number">2</span>];</span><br></pre></td></tr></table></figure>
+
+<p>这里就是把一个 Selector <code>addNumber1:andNumber2</code> 带上了参数发送给了 calulator 对象。</p>
+<h3 id="SEL-类型"><a href="#SEL-类型" class="headerlink" title="SEL 类型"></a>SEL 类型</h3><p>SEL，即 Selector 类型，是 Objective-C 的一个特殊的类型，它是一个<strong>唯一的标识符</strong>，来代表某个 Selector。相同的 Selector 的 SEL 标识符一定也是相同的。</p>
+<p>创建 SEL 类型的变量有两种方式：</p>
+<p><strong>编译时创建：</strong><br>用 @selector 关键字来 创建，这时代码补全功能能在当前位置寻找已经声明过的 Selector，同时编译器也会检查 Selector 的合法性。</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SEL selector = <span class="keyword">@selector</span>(addNumber1:andNumber2:);</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行时创建：</strong><br>用 NSSelectorFromString 创建，参数用一个字符串类型来代表传入的 Selector，运行时可以根据需要来传入不同的 Selector：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SEL selector = <span class="built_in">NSSelectorFromString</span>(<span class="string">@&quot;addNumber1:andNumber2:&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法签名"><a href="#方法签名" class="headerlink" title="方法签名"></a>方法签名</h3><p>方法签名定义了一个方法的参数和返回值的类型。</p>
+<p>方法签名在日常开发中使用的频度不高，但是它必须得存在，它存在的意义是什么呢？</p>
+<p>这就要提到 Objective-C 进行消息传递的机制了，Objective-C 中给对象发送一个消息，例如 <code>[object description]</code>，会被编译成一个 C 函数的调用（objc_msgSend），这个 C 函数的生成需要知道两个信息，一个是函数名及其参数列表，一个是参数的类型和返回值的类型。</p>
+<p>函数名和参数列表可以从 Selector 中获得，参数和返回值类型则是从方法签名中获得。因此为了确定一个方法，Selector 和方法签名缺一不可。</p>
+<p>编译器在编译时会检查每个方法的声明，从中解析出 Selector 和方法签名。</p>
+<h3 id="签名不匹配"><a href="#签名不匹配" class="headerlink" title="签名不匹配"></a>签名不匹配</h3><p>由于 Objective-C 在方法调用（消息传递）时，具有动态类型（Dynamic typing）的特性，消息的接收者的类型在运行时才能确定。对于可能为任何类型的接收者，例如接收者为 id 类型，因为编译器只能基于方法声明上取得方法签名，这时编译器取得的方法签名只是一个推测值，这就有可能会发生签名不匹配。当发生签名不匹配时，这类情况会导致各种运行时错误，如栈溢出、无效的输入输出参数或无效的返回值等。</p>
+<p>例如有下面三个类：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Calculator1</span> : <span class="title">NSObject</span></span></span><br><span class="line">- (<span class="type">int</span>)addNumber1:(<span class="built_in">NSInteger</span>)number1 andNumber2:(<span class="built_in">NSInteger</span>)number2;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Calculator2</span> : <span class="title">NSObject</span></span></span><br><span class="line">- (<span class="type">float</span>)addNumber1:(<span class="type">float</span>)number1 andNumber2:(<span class="type">float</span>)number2;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Calculator3</span> : <span class="title">NSObject</span></span></span><br><span class="line">- (<span class="built_in">NSInteger</span>)addNumber1:(<span class="built_in">NSInteger</span>)number1 andNumber2:(<span class="built_in">NSInteger</span>)number2;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>对于有可能是这三种类型中的任何一种的接收者，编译器推测的方法类型可能是错误的。如下面的消息传递：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[receiver addNumber1:<span class="number">25</span> andNumber2:<span class="number">10</span>]</span><br></pre></td></tr></table></figure>
+
+<p>编译器在生成 C 函数时，使用的 Selector 为 <code>addNumber1:andNumber2</code>，方法签名为 <code>(NSInteger, NSInteger) -&gt; int</code>。</p>
+<p>然后实际消息发送中，发现 receiver 是 Calculator2 类型，就会发生方法不匹配，从而发生运行时错误。</p>
+<h3 id="怎样避免发生签名不匹配"><a href="#怎样避免发生签名不匹配" class="headerlink" title="怎样避免发生签名不匹配"></a>怎样避免发生签名不匹配</h3><p>避免这类问题发生的办法就是对于方法签名相同的方法，尽量采用不同的名字。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/docker-hexo/" rel="next" title="用 Docker 搭建 Hexo 博客">
+                <i class="fa fa-chevron-left"></i> 用 Docker 搭建 Hexo 博客
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/objective-c-runtime-2-dynamic-typing-and-dynamic-binding/" rel="prev" title="Objective-C Runtime（二）：动态类型，动态绑定，动态方法决议，内省">
+                Objective-C Runtime（二）：动态类型，动态绑定，动态方法决议，内省 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Selector"><span class="nav-number">1.</span> <span class="nav-text">Selector</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SEL-%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">SEL 类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E7%AD%BE%E5%90%8D"><span class="nav-number">3.</span> <span class="nav-text">方法签名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%BE%E5%90%8D%E4%B8%8D%E5%8C%B9%E9%85%8D"><span class="nav-number">4.</span> <span class="nav-text">签名不匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E6%A0%B7%E9%81%BF%E5%85%8D%E5%8F%91%E7%94%9F%E7%AD%BE%E5%90%8D%E4%B8%8D%E5%8C%B9%E9%85%8D"><span class="nav-number">5.</span> <span class="nav-text">怎样避免发生签名不匹配</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">晨曦微光</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">146k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点总阅读时长">2:26</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.2</div>
+
+
+<div>Hosted by <a target="_blank" rel="noopener" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'krbUxLGKWA6SjK4bKeeJcu8Q-gzGzoHsz',
+        appKey: 'G2GNz7MLppJZuew6PZbdiZhf',
+        placeholder: '填写评论内容',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("nGSnOI7jqHLeho9asFx6j3b9-gzGzoHsz", "r6e5CNQIXNTbVb7KFX4R5rxk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

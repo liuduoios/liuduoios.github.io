@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta name="description" content="Objective-C 在声明一个属性的时候，想必大家都是不用经过大脑思考就会写 @property (nonatomic, ...。 我们都知道属性可以是 nonatomic 也可以使 atomic 的，但是好像几乎所有属性在声明的时候 nonatomic，atomic 的属性几乎没出现过。atomic 修饰符仿佛已被大家遗忘。 实际上，如果声明属性时既不写 atomic 也不写 nonatom">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Objective-C 原子属性">
+<meta property="og:url" content="https://liuduoios.github.io/objective-c-atomic/index.html">
+<meta property="og:site_name" content="My Knowledge Library">
+<meta property="og:description" content="Objective-C 在声明一个属性的时候，想必大家都是不用经过大脑思考就会写 @property (nonatomic, ...。 我们都知道属性可以是 nonatomic 也可以使 atomic 的，但是好像几乎所有属性在声明的时候 nonatomic，atomic 的属性几乎没出现过。atomic 修饰符仿佛已被大家遗忘。 实际上，如果声明属性时既不写 atomic 也不写 nonatom">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-02-08T05:04:34.000Z">
+<meta property="article:modified_time" content="2023-06-05T05:33:26.595Z">
+<meta property="article:author" content="晨曦微光">
+<meta name="twitter:card" content="summary">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="My Knowledge Library" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://liuduoios.github.io/objective-c-atomic/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Objective-C 原子属性 | My Knowledge Library</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">My Knowledge Library</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">个人博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/objective-c-atomic/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My Knowledge Library">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Objective-C 原子属性</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-08T13:04:34+08:00">2018-02-08</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/objective-c-atomic/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/objective-c-atomic/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/objective-c-atomic/" class="leancloud_visitors" data-flag-title="Objective-C 原子属性">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">12k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">12 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Objective-C 在声明一个属性的时候，想必大家都是不用经过大脑思考就会写 <code>@property (nonatomic, ...</code>。</p>
+<p>我们都知道属性可以是 nonatomic 也可以使 atomic 的，但是好像几乎所有属性在声明的时候 nonatomic，atomic 的属性几乎没出现过。atomic 修饰符仿佛已被大家遗忘。</p>
+<p>实际上，如果声明属性时既不写 atomic 也不写 nonatomic，那么这个属性<strong>默认是 atomic 的</strong>。</p>
+<h3 id="atomic-的作用和工作原理"><a href="#atomic-的作用和工作原理" class="headerlink" title="atomic 的作用和工作原理"></a>atomic 的作用和工作原理</h3><p>从字面上来看 nonatomic 是非原子的，atomic 是原子的。</p>
+<p>atomic 的作用为：</p>
+<blockquote>
+<p>atomic 修饰的属性的写操作是一个原子操作。</p>
+</blockquote>
+<p><strong>什么是原子操作？</strong></p>
+<p>原子操作就是指不会被线程调度机制打断的操作。这个操作是一个整体，CPU 一旦开始执行它，就会一直到执行结束，在这期间 CPU 不会转而去执行其它线程的操作。</p>
+<p>可以用代码来模拟一下 atomic 的工作原理：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="string">&quot;ViewController.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> ()</span></span><br><span class="line"><span class="keyword">@property</span> (atomic, <span class="keyword">assign</span>) <span class="built_in">NSInteger</span> count;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ViewController</span></span></span><br><span class="line"><span class="keyword">@synthesize</span> count = _count;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)setCount:(<span class="built_in">NSInteger</span>)count &#123;</span><br><span class="line">    <span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        _count = count;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">NSInteger</span>)count &#123;</span><br><span class="line">    <span class="keyword">return</span> _count;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>看上面代码，ViewController 有个 count 属性，我们重写了它的 Setter 和 Getter 方法，在 Setter 方法中，通过 <code>@synchronized (self) &#123;&#125;</code> 为复制操作 <code>_count = count</code> 加了一把锁，使得赋值这个操作同一时间只能有一个线程执行，保证了写属性值的时候的线程安全。</p>
+<p>上面代码实现了和 atomic 相同的功能，但是底层的工作方式还是有区别的。我们常常用 <code>@synchronized</code> 来加锁，这种锁是<strong>互斥锁</strong>。而 atomic 修饰的属性自带了一把<strong>自旋锁</strong>。</p>
+<p><strong>互斥锁和自旋锁的区别：</strong></p>
+<table>
+<thead>
+<tr>
+<th>锁名</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>互斥锁</td>
+<td>当某个资源被先进入的线程上了锁以后，其它后面进入的线程会<strong>进入休眠状态</strong>。当锁释放后，进入休眠状态的线程变为唤醒状态。</td>
+</tr>
+<tr>
+<td>自旋锁</td>
+<td>当某个资源被先进入的线程上了锁以后，其它后进入的线程会开启一个<strong>循环</strong>，不断检查锁有没有释放，当锁释放后，退出循环开始访问资源，整个过程中后进入的线程一直<strong>保持运行状态</strong>。</td>
+</tr>
+</tbody></table>
+<h3 id="大多数情况下，atomic-并不能保证线程安全"><a href="#大多数情况下，atomic-并不能保证线程安全" class="headerlink" title="大多数情况下，atomic 并不能保证线程安全"></a>大多数情况下，atomic 并不能保证线程安全</h3><p>既然 atomic 能简单的让一个属性的写操作变成线程安全的，为什么几乎不用它？</p>
+<p>下面看一个简单的例子：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="string">&quot;ViewController.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> ()</span></span><br><span class="line"><span class="keyword">@property</span> (atomic, <span class="keyword">assign</span>) <span class="built_in">NSInteger</span> count;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ViewController</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="variable language_">super</span> viewDidLoad];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">self</span>.count = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSThread</span> *threadA = [[<span class="built_in">NSThread</span> alloc] initWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(doSomething) object:<span class="literal">nil</span>];</span><br><span class="line">    [threadA start];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSThread</span> *threadB = [[<span class="built_in">NSThread</span> alloc] initWithTarget:<span class="keyword">self</span> selector:<span class="keyword">@selector</span>(doSomething) object:<span class="literal">nil</span>];</span><br><span class="line">    [threadB start];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)doSomething &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">NSInteger</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        [<span class="built_in">NSThread</span> sleepForTimeInterval:<span class="number">1.0</span>];</span><br><span class="line">        <span class="keyword">self</span>.count++;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;self.count = %@ %@&quot;</span>, @(<span class="keyword">self</span>.count), [<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>上面代码中，把属性 count 声明为 atomic 的。在 viewDidLoad 中创建了两个线程 threadA 和 threadB，都去执行 doSomething 方法。在 doSomething 方法中，去给 self.count 的值通过每次循环 +1 增加 10 次，然后打印 self.count 的值。为了让异常情况出现的概率提高，加入一句 <code>[NSThread sleepForTimeInterval:1.0];</code>。</p>
+<p>运行上面的代码，会发现打印的结果中，最后一条 self.count 的值往往是小于 20 的，在中间的某些打印日志中，会发现有些数字被重复打印的两次。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">2018-02-07 23:05:08.718744+0800 AtomicDemo[53388:2777211] self.count = 13 &lt;NSThread: 0x600000265f40&gt;&#123;number = 4, name = (null)&#125;</span><br><span class="line">2018-02-07 23:05:08.718791+0800 AtomicDemo[53388:2777210] self.count = 14 &lt;NSThread: 0x600000265f00&gt;&#123;number = 3, name = (null)&#125;</span><br><span class="line">2018-02-07 23:05:09.719374+0800 AtomicDemo[53388:2777210] self.count = 15 &lt;NSThread: 0x600000265f00&gt;&#123;number = 3, name = (null)&#125;</span><br><span class="line">2018-02-07 23:05:09.719374+0800 AtomicDemo[53388:2777211] self.count = 15 &lt;NSThread: 0x600000265f40&gt;&#123;number = 4, name = (null)&#125;</span><br><span class="line">2018-02-07 23:05:10.719673+0800 AtomicDemo[53388:2777211] self.count = 17 &lt;NSThread: 0x600000265f40&gt;&#123;number = 4, name = (null)&#125;</span><br><span class="line">2018-02-07 23:05:10.719673+0800 AtomicDemo[53388:2777210] self.count = 16 &lt;NSThread: 0x600000265f00&gt;&#123;number = 3, name = (null)&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>上面的结果中 15 出现了两次，这说明在使用 atomic 的情况下，还是出现了资源竞争。</p>
+<p>那么原因在哪里呢？</p>
+<p>我们看这句代码：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">self</span>.count++;</span><br></pre></td></tr></table></figure>
+
+<p>这句代码做了两件事，先读取 self.count 的值，然后把读取到的值 + 1 后赋值给 self.count。</p>
+<p>由于 atomic 仅仅能保证写是线程安全的，而不是保证 读 -&gt; +1 -&gt; 写，这个整体是线程安全的。</p>
+<p>当两个线程都执行到读取完 self.count 的值后，再去写，就会写成一样的值。</p>
+<p>所以大部分情况下，为了保证线程安全，还是要自己加锁，可以根据需要来保证某块代码整体的线程安全。</p>
+<p>线程安全的代码：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)doSomething &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">NSInteger</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        [<span class="built_in">NSThread</span> sleepForTimeInterval:<span class="number">1.0</span>];</span><br><span class="line">        <span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">            <span class="keyword">self</span>.count++;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;self.count = %@ %@&quot;</span>, @(<span class="keyword">self</span>.count), [<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为 atomic 在大部分情况下都无法保证线程安全，并且 atomic 的属性因为增加了原子性而降低了执行效率，因此实际开发中几乎不会出现 atomic 的身影。</p>
+<h3 id="nonatomic-对比-atomic"><a href="#nonatomic-对比-atomic" class="headerlink" title="nonatomic 对比 atomic"></a>nonatomic 对比 atomic</h3><p>最后简单对比一下 nonatomic 和 atomic</p>
+<table>
+<thead>
+<tr>
+<th>修饰符</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>nonatomic</td>
+<td>执行效率高，性能好</td>
+<td>不是线程安全的</td>
+</tr>
+<tr>
+<td>atomic</td>
+<td>线程安全，但是仅能保证写操作的线程安全</td>
+<td>大幅降低执行效率</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/kvo-imp/" rel="next" title="用 Runtime 自己动手实现 KVO —— 探究 KVO 的底层实现">
+                <i class="fa fa-chevron-left"></i> 用 Runtime 自己动手实现 KVO —— 探究 KVO 的底层实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/gcd-maybe-you-dont-know/" rel="prev" title="GCD 中那些你可能不熟悉的知识">
+                GCD 中那些你可能不熟悉的知识 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#atomic-%E7%9A%84%E4%BD%9C%E7%94%A8%E5%92%8C%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">atomic 的作用和工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E5%A4%9A%E6%95%B0%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%8Catomic-%E5%B9%B6%E4%B8%8D%E8%83%BD%E4%BF%9D%E8%AF%81%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8"><span class="nav-number">2.</span> <span class="nav-text">大多数情况下，atomic 并不能保证线程安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nonatomic-%E5%AF%B9%E6%AF%94-atomic"><span class="nav-number">3.</span> <span class="nav-text">nonatomic 对比 atomic</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">晨曦微光</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">146k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点总阅读时长">2:26</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.2</div>
+
+
+<div>Hosted by <a target="_blank" rel="noopener" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'krbUxLGKWA6SjK4bKeeJcu8Q-gzGzoHsz',
+        appKey: 'G2GNz7MLppJZuew6PZbdiZhf',
+        placeholder: '填写评论内容',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("nGSnOI7jqHLeho9asFx6j3b9-gzGzoHsz", "r6e5CNQIXNTbVb7KFX4R5rxk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

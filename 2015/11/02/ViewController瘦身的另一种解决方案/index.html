@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="架构," />
+
+
+<meta name="description" content="对于Massive View Controller，现在流行的解决方案是MVVM架构，把业务逻辑移入ViewModel来减少ViewController中的代码。 这几天又看到另一种方案，在此介绍一下。 例子我们通过例子来说明，这里举的例子是一个常见的基于TableView的界面——一个通讯录用户信息列表。       我们要实现的业务流程如下App启动后首先读取本地Core Data中的数据，并">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ViewController瘦身的另一种解决方案">
+<meta property="og:url" content="https://liuduoios.github.io/2015/11/02/ViewController%E7%98%A6%E8%BA%AB%E7%9A%84%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="My Knowledge Library">
+<meta property="og:description" content="对于Massive View Controller，现在流行的解决方案是MVVM架构，把业务逻辑移入ViewModel来减少ViewController中的代码。 这几天又看到另一种方案，在此介绍一下。 例子我们通过例子来说明，这里举的例子是一个常见的基于TableView的界面——一个通讯录用户信息列表。       我们要实现的业务流程如下App启动后首先读取本地Core Data中的数据，并">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liuduoios.github.io/QQ20151102-0.png">
+<meta property="article:published_time" content="2015-11-02T04:05:56.000Z">
+<meta property="article:modified_time" content="2023-06-05T05:33:26.596Z">
+<meta property="article:author" content="晨曦微光">
+<meta property="article:tag" content="架构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liuduoios.github.io/QQ20151102-0.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="My Knowledge Library" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://liuduoios.github.io/2015/11/02/ViewController瘦身的另一种解决方案/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>ViewController瘦身的另一种解决方案 | My Knowledge Library</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">My Knowledge Library</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">个人博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/2015/11/02/ViewController%E7%98%A6%E8%BA%AB%E7%9A%84%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My Knowledge Library">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ViewController瘦身的另一种解决方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-02T12:05:56+08:00">2015-11-02</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/11/02/ViewController%E7%98%A6%E8%BA%AB%E7%9A%84%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2015/11/02/ViewController%E7%98%A6%E8%BA%AB%E7%9A%84%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/11/02/ViewController%E7%98%A6%E8%BA%AB%E7%9A%84%E5%8F%A6%E4%B8%80%E7%A7%8D%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" class="leancloud_visitors" data-flag-title="ViewController瘦身的另一种解决方案">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">27k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">27 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>对于Massive View Controller，现在流行的解决方案是MVVM架构，把业务逻辑移入ViewModel来减少ViewController中的代码。</p>
+<p>这几天又看到另一种方案，在此介绍一下。</p>
+<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><p>我们通过例子来说明，这里举的例子是一个常见的基于TableView的界面——一个通讯录用户信息列表。  </p>
+<center>
+<img style="width: 50%; height: 50%;" src="/QQ20151102-0.png">
+</center>
+
+<h3 id="我们要实现的业务流程如下"><a href="#我们要实现的业务流程如下" class="headerlink" title="我们要实现的业务流程如下"></a>我们要实现的业务流程如下</h3><p>App启动后首先读取本地Core Data中的数据，并展现出来，然后调用Web API来获取到用户数据列表，然后更新本地Core Data数据库，只要数据更新了，UI上的展现也随之变化。<br>用户也可以在本地添加用户数据，然后这些数据会同步到服务端。</p>
+<h4 id="1-声明协议"><a href="#1-声明协议" class="headerlink" title="1. 声明协议"></a>1. 声明协议</h4><p>我们不会把所有的业务逻辑都写到ViewController里，而是首先声明两个protocol：</p>
+<h5 id="PeopleListDataProviderProtocol"><a href="#PeopleListDataProviderProtocol" class="headerlink" title="PeopleListDataProviderProtocol"></a>PeopleListDataProviderProtocol</h5><p>定义了数据源对象要实现的属性和方法</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">PeopleListDataProviderProtocol</span>: <span class="title class_">UITableViewDataSource</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> managedObjectContext: <span class="type">NSManagedObjectContext</span>? &#123; <span class="keyword">get</span> <span class="keyword">set</span> &#125;</span><br><span class="line">  <span class="keyword">weak</span> <span class="keyword">var</span> tableView: <span class="type">UITableView</span>! &#123; <span class="keyword">get</span> <span class="keyword">set</span> &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">addPerson</span>(<span class="params">personInfo</span>: <span class="type">PersonInfo</span>)</span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">fetch</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="APICommunicatorProtocol"><a href="#APICommunicatorProtocol" class="headerlink" title="APICommunicatorProtocol"></a>APICommunicatorProtocol</h5><p>定义了API请求者要实现的属性和方法</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">APICommunicatorProtocol</span> &#123;</span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">getPeople</span>() -&gt; (<span class="type">NSError</span>?, [<span class="type">PersonInfo</span>]<span class="operator">?</span>)</span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">postPerson</span>(<span class="params">personInfo</span>: <span class="type">PersonInfo</span>) -&gt; <span class="type">NSError</span>?</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-编写ViewController"><a href="#2-编写ViewController" class="headerlink" title="2. 编写ViewController"></a>2. 编写ViewController</h4><p>我们的ViewController叫做<code>PeopleListViewController</code>，在其中声明两个属性：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">var</span> dataProvider: <span class="type">PeopleListDataProviderProtocol</span>?</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">var</span> communicator: <span class="type">APICommunicatorProtocol</span> <span class="operator">=</span> <span class="type">APICommunicator</span>()</span><br></pre></td></tr></table></figure>
+
+<p>实现ViewDidLoad</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">viewDidLoad</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>.viewDidLoad()</span><br><span class="line">    <span class="comment">// Do any additional setup after loading the view, typically from a nib.</span></span><br><span class="line">    <span class="keyword">self</span>.navigationItem.leftBarButtonItem <span class="operator">=</span> <span class="keyword">self</span>.editButtonItem()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> addButton <span class="operator">=</span> <span class="type">UIBarButtonItem</span>(barButtonSystemItem: .<span class="type">Add</span>, target: <span class="keyword">self</span>, action: <span class="string">&quot;addPerson&quot;</span>)</span><br><span class="line">    <span class="keyword">self</span>.navigationItem.rightBarButtonItem <span class="operator">=</span> addButton</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ViewController继承于UITableViewController</span></span><br><span class="line">    <span class="built_in">assert</span>(dataProvider <span class="operator">!=</span> <span class="literal">nil</span>, <span class="string">&quot;dataProvider is not allowed to be nil at this point&quot;</span>)</span><br><span class="line">    tableView.dataSource <span class="operator">=</span> dataProvider</span><br><span class="line">    dataProvider<span class="operator">?</span>.tableView <span class="operator">=</span> tableView</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>添加按钮的事件响应方法和回调：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">addPerson</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> picker <span class="operator">=</span> <span class="type">ABPeoplePickerNavigationController</span>()</span><br><span class="line">    picker.peoplePickerDelegate <span class="operator">=</span> <span class="keyword">self</span></span><br><span class="line">    presentViewController(picker, animated: <span class="literal">true</span>, completion: <span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">PeopleListViewController</span>: <span class="title class_">ABPeoplePickerNavigationControllerDelegate</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">peoplePickerNavigationController</span>(<span class="params">peoplePicker</span>: <span class="type">ABPeoplePickerNavigationController</span>, <span class="params">didSelectPerson</span> <span class="params">person</span>: <span class="type">ABRecord</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> personInfo <span class="operator">=</span> <span class="type">PersonInfo</span>(abRecord: person)</span><br><span class="line">        dataProvider<span class="operator">?</span>.addPerson(personInfo)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后再添加两个方法来请求和同步数据：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">fetchPeopleFromAPI</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> allPersonInfos <span class="operator">=</span> communicator.getPeople().<span class="number">1</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> allPersonInfos <span class="operator">=</span> allPersonInfos &#123;</span><br><span class="line">        <span class="keyword">for</span> personInfo <span class="keyword">in</span> allPersonInfos &#123;</span><br><span class="line">            dataProvider<span class="operator">?</span>.addPerson(personInfo)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">sendPersonToAPI</span>(<span class="params">personInfo</span>: <span class="type">PersonInfo</span>) &#123;</span><br><span class="line">    communicator.postPerson(personInfo)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>到此，我们的ViewController已经全部完成了，只有60行代码，是不是很开森。</p>
+<p>那Web API调用、Core Data操作，业务逻辑的代码都去哪儿了呢？<br>OK，我们可以开始编写实现那两个协议的类了。</p>
+<h4 id="3-实现Protocol"><a href="#3-实现Protocol" class="headerlink" title="3. 实现Protocol"></a>3. 实现Protocol</h4><p>首先是实现了<code>APICommunicatorProtocol</code>的<code>APICommunicator</code>类：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">APICommunicator</span>: <span class="title class_">APICommunicatorProtocol</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">getPeople</span>() -&gt; (<span class="type">NSError</span>?, [<span class="type">PersonInfo</span>]<span class="operator">?</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="literal">nil</span>, <span class="literal">nil</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">postPerson</span>(<span class="params">personInfo</span>: <span class="type">PersonInfo</span>) -&gt; <span class="type">NSError</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>与服务端的交互这里就先省略了，就简单实现一下。</p>
+<p>然后再看实现了<code>PeopleListDataProviderProtocol</code>的<code>PeopleListDataProvider</code>类：<br>主要是以下几个部分：</p>
+<p>对Core Data操作的实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">fetch</span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> sortKey <span class="operator">=</span> <span class="type">NSUserDefaults</span>.standardUserDefaults().integerForKey(<span class="string">&quot;sort&quot;</span>) <span class="operator">==</span> <span class="number">0</span> <span class="operator">?</span> <span class="string">&quot;lastName&quot;</span> : <span class="string">&quot;firstName&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> sortDescriptor <span class="operator">=</span> <span class="type">NSSortDescriptor</span>(key: sortKey, ascending: <span class="literal">true</span>)</span><br><span class="line">    <span class="keyword">let</span> sortDescriptors <span class="operator">=</span> [sortDescriptor]</span><br><span class="line"></span><br><span class="line">    fetchedResultsController.fetchRequest.sortDescriptors <span class="operator">=</span> sortDescriptors</span><br><span class="line">    <span class="keyword">var</span> error: <span class="type">NSError</span>? <span class="operator">=</span> <span class="literal">nil</span></span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">      <span class="keyword">try</span> fetchedResultsController.performFetch()</span><br><span class="line">    &#125; <span class="keyword">catch</span> <span class="keyword">let</span> error1 <span class="keyword">as</span> <span class="type">NSError</span> &#123;</span><br><span class="line">      error <span class="operator">=</span> error1</span><br><span class="line">      <span class="built_in">print</span>(<span class="string">&quot;error: <span class="subst">\(error)</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    tableView.reloadData()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对<code>TableViewDataSource</code>的实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">numberOfSectionsInTableView</span>(<span class="params">tableView</span>: <span class="type">UITableView</span>) -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>.fetchedResultsController.sections<span class="operator">?</span>.count <span class="operator">??</span> <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">tableView</span>(<span class="params">tableView</span>: <span class="type">UITableView</span>, <span class="params">cellForRowAtIndexPath</span> <span class="params">indexPath</span>: <span class="type">NSIndexPath</span>) -&gt; <span class="type">UITableViewCell</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> cell <span class="operator">=</span> tableView.dequeueReusableCellWithIdentifier(<span class="string">&quot;Cell&quot;</span>, forIndexPath: indexPath)</span><br><span class="line">    <span class="keyword">self</span>.configureCell(cell, atIndexPath: indexPath)</span><br><span class="line">    <span class="keyword">return</span> cell</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">configureCell</span>(<span class="params">cell</span>: <span class="type">UITableViewCell</span>, <span class="params">atIndexPath</span> <span class="params">indexPath</span>: <span class="type">NSIndexPath</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> person <span class="operator">=</span> <span class="keyword">self</span>.fetchedResultsController.objectAtIndexPath(indexPath) <span class="keyword">as!</span> <span class="type">Person</span></span><br><span class="line">    cell.textLabel<span class="operator">!</span>.text <span class="operator">=</span> person.fullname</span><br><span class="line">    cell.detailTextLabel<span class="operator">!</span>.text <span class="operator">=</span> dateFormatter.stringFromDate(person.birthday)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对<code>NSFetchedResultsControllerDelegate</code>的实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">controller</span>(<span class="params">controller</span>: <span class="type">NSFetchedResultsController</span>, <span class="params">didChangeObject</span> <span class="params">anObject</span>: <span class="type">AnyObject</span>, <span class="params">atIndexPath</span> <span class="params">indexPath</span>: <span class="type">NSIndexPath</span>?, <span class="params">forChangeType</span> <span class="params">type</span>: <span class="type">NSFetchedResultsChangeType</span>, <span class="params">newIndexPath</span>: <span class="type">NSIndexPath</span>?) &#123;</span><br><span class="line">    <span class="keyword">switch</span> type &#123;</span><br><span class="line">    <span class="keyword">case</span> .<span class="type">Insert</span>:</span><br><span class="line">        tableView.insertRowsAtIndexPaths([newIndexPath<span class="operator">!</span>], withRowAnimation: .<span class="type">Fade</span>)</span><br><span class="line">    <span class="keyword">case</span> .<span class="type">Delete</span>:</span><br><span class="line">        tableView.deleteRowsAtIndexPaths([indexPath<span class="operator">!</span>], withRowAnimation: .<span class="type">Fade</span>)</span><br><span class="line">    <span class="keyword">case</span> .<span class="type">Update</span>:</span><br><span class="line">        <span class="keyword">self</span>.configureCell(tableView.cellForRowAtIndexPath(indexPath<span class="operator">!</span>)<span class="operator">!</span>, atIndexPath: indexPath<span class="operator">!</span>)</span><br><span class="line">    <span class="keyword">case</span> .<span class="type">Move</span>:</span><br><span class="line">        tableView.deleteRowsAtIndexPaths([indexPath<span class="operator">!</span>], withRowAnimation: .<span class="type">Fade</span>)</span><br><span class="line">        tableView.insertRowsAtIndexPaths([newIndexPath<span class="operator">!</span>], withRowAnimation: .<span class="type">Fade</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><em>(未列出所有代码）</em></p>
+<p>可以看到，我们把业务逻辑都放入了<code>PeopleListDataProviderProtocol</code>和<code>APICommunicatorProtocol</code>这两个协议的实现中。在<code>ViewController</code>中通过属性来引用这两个协议的实现类，并且调用协议中定义的方法。</p>
+<h3 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h3><ol>
+<li>ViewController中的代码就变的短小而清晰。</li>
+<li>同MVVM一样也实现了界面和业务逻辑的分离。</li>
+<li>相对与MVVM，学习成本较低。</li>
+<li>可以方便的创建Mock对象。</li>
+</ol>
+<h3 id="Mock对象"><a href="#Mock对象" class="headerlink" title="Mock对象"></a>Mock对象</h3><p>例如这个<code>APICommunicator</code></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">var</span> communicator: <span class="type">APICommunicatorProtocol</span> <span class="operator">=</span> <span class="type">APICommunicator</span>()</span><br></pre></td></tr></table></figure>
+
+<p>在开发过程中或者单元测试时都可以用一个Mock对象<code>MockAPICommunicator</code>来替代它，来提供fake data。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MockAPICommunicator</span>: <span class="title class_">APICommunicatorProtocol</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> allPersonInfo <span class="operator">=</span> [<span class="type">PersonInfo</span>]()</span><br><span class="line">    <span class="keyword">var</span> postPersonGotCalled <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">getPeople</span>() -&gt; (<span class="type">NSError</span>?, [<span class="type">PersonInfo</span>]<span class="operator">?</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="literal">nil</span>, allPersonInfo)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">postPerson</span>(<span class="params">personInfo</span>: <span class="type">PersonInfo</span>) -&gt; <span class="type">NSError</span>? &#123;</span><br><span class="line">        postPersonGotCalled <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样在服务端API还没有部署时，我们可以很方便的用一些假数据来帮助完成功能的开发，等API上线后换成真正的<code>APICommunicator</code>类。</p>
+<p>同样可以提供一个实现了<code>PeopleListDataProviderProtocol</code>的<code>MockDataProvider</code>类。</p>
+<p>也可以很方便的借用Mock对象来进行单元测试。<br>例如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">testFetchingPeopleFromAPICallsAddPeople</span>() &#123;</span><br><span class="line">    <span class="comment">// given</span></span><br><span class="line">    <span class="keyword">let</span> mockDataProvider <span class="operator">=</span> <span class="type">MockDataProvider</span>()</span><br><span class="line">    viewController.dataProvider <span class="operator">=</span> mockDataProvider</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> mockCommunicator <span class="operator">=</span> <span class="type">MockAPICommunicator</span>()</span><br><span class="line">    mockCommunicator.allPersonInfo <span class="operator">=</span> [<span class="type">PersonInfo</span>(firstName: <span class="string">&quot;firstname&quot;</span>, lastName: <span class="string">&quot;lastname&quot;</span>, birthday: <span class="type">NSDate</span>())]</span><br><span class="line">    viewController.communicator <span class="operator">=</span> mockCommunicator</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// when</span></span><br><span class="line">    viewController.fetchPeopleFromAPI()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// then</span></span><br><span class="line">    <span class="type">XCTAssertTrue</span>(mockDataProvider.addPersonGotCalled, <span class="string">&quot;addPerson should have been called&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>MVVM的优势在于较为普遍，大家都懂的模式，减少了沟通成本。但是对于响应式编程、事件管道，ReactiveCocoa等概念，还是需要一定学习成本的。<br>在不使用MVVM的情况下，不妨试试本文介绍的结构来实现ViewController，为ViewController瘦身。</p>
+<p><br /><br /></p>
+<p>参考资料：<br><a target="_blank" rel="noopener" href="http://www.raywenderlich.com/101306/unit-testing-tutorial-mocking-objects">http://www.raywenderlich.com/101306/unit-testing-tutorial-mocking-objects</a></p>
+<p>源码下载：<br><a target="_blank" rel="noopener" href="http://cdn2.raywenderlich.com/wp-content/uploads/2015/04/Birthdays_Final1.zip">http://cdn2.raywenderlich.com/wp-content/uploads/2015/04/Birthdays_Final1.zip</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/26/%E5%A6%82%E4%BD%95%E5%AF%B9ViewModel%E8%BF%9B%E8%A1%8C%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/" rel="next" title="如何对ViewModel进行单元测试">
+                <i class="fa fa-chevron-left"></i> 如何对ViewModel进行单元测试
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/17/Alamofire-%E6%BA%90%E7%A0%81%E8%B5%8F%E6%9E%90%EF%BC%88%E4%B8%80%EF%BC%89%E5%9F%BA%E7%A1%80%E7%AF%87/" rel="prev" title="Alamofire 源码赏析（一）基础篇">
+                Alamofire 源码赏析（一）基础篇 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90"><span class="nav-number">1.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E4%BB%AC%E8%A6%81%E5%AE%9E%E7%8E%B0%E7%9A%84%E4%B8%9A%E5%8A%A1%E6%B5%81%E7%A8%8B%E5%A6%82%E4%B8%8B"><span class="nav-number">2.</span> <span class="nav-text">我们要实现的业务流程如下</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%A3%B0%E6%98%8E%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.1.</span> <span class="nav-text">1. 声明协议</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#PeopleListDataProviderProtocol"><span class="nav-number">2.1.1.</span> <span class="nav-text">PeopleListDataProviderProtocol</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#APICommunicatorProtocol"><span class="nav-number">2.1.2.</span> <span class="nav-text">APICommunicatorProtocol</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%BC%96%E5%86%99ViewController"><span class="nav-number">2.2.</span> <span class="nav-text">2. 编写ViewController</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%AE%9E%E7%8E%B0Protocol"><span class="nav-number">2.3.</span> <span class="nav-text">3. 实现Protocol</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8A%BF"><span class="nav-number">3.</span> <span class="nav-text">优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mock%E5%AF%B9%E8%B1%A1"><span class="nav-number">4.</span> <span class="nav-text">Mock对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">晨曦微光</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">146k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点总阅读时长">2:26</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.2</div>
+
+
+<div>Hosted by <a target="_blank" rel="noopener" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'krbUxLGKWA6SjK4bKeeJcu8Q-gzGzoHsz',
+        appKey: 'G2GNz7MLppJZuew6PZbdiZhf',
+        placeholder: '填写评论内容',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("nGSnOI7jqHLeho9asFx6j3b9-gzGzoHsz", "r6e5CNQIXNTbVb7KFX4R5rxk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

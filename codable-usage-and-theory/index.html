@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+<meta name="description" content="Codable 是什么Codable 本身就是个类型别名 1typealias Codable &#x3D; Decodable &amp; Encodable 代表一个同时符合 Decodable 和 Encodable 协议的类型，即可解码且可编码的类型。 Codable 也可以代表苹果为 Swift 开发的一套编解码系统，从 Swift 4 开始引入，包含了 Encoder 和 Decoder 协议和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="详解 Codable 的用法和原理">
+<meta property="og:url" content="https://liuduoios.github.io/codable-usage-and-theory/index.html">
+<meta property="og:site_name" content="My Knowledge Library">
+<meta property="og:description" content="Codable 是什么Codable 本身就是个类型别名 1typealias Codable &#x3D; Decodable &amp; Encodable 代表一个同时符合 Decodable 和 Encodable 协议的类型，即可解码且可编码的类型。 Codable 也可以代表苹果为 Swift 开发的一套编解码系统，从 Swift 4 开始引入，包含了 Encoder 和 Decoder 协议和">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-09-13T01:01:19.000Z">
+<meta property="article:modified_time" content="2023-06-05T05:33:26.598Z">
+<meta property="article:author" content="晨曦微光">
+<meta name="twitter:card" content="summary">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="My Knowledge Library" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://liuduoios.github.io/codable-usage-and-theory/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>详解 Codable 的用法和原理 | My Knowledge Library</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">My Knowledge Library</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">个人博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/codable-usage-and-theory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My Knowledge Library">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">详解 Codable 的用法和原理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-09-13T09:01:19+08:00">2022-09-13</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Swift/" itemprop="url" rel="index"><span itemprop="name">Swift</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/codable-usage-and-theory/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/codable-usage-and-theory/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/codable-usage-and-theory/" class="leancloud_visitors" data-flag-title="详解 Codable 的用法和原理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">54k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">54 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Codable-是什么"><a href="#Codable-是什么" class="headerlink" title="Codable 是什么"></a>Codable 是什么</h1><p>Codable 本身就是个类型别名</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typealias</span> <span class="type">Codable</span> <span class="operator">=</span> <span class="type">Decodable</span> &amp; <span class="type">Encodable</span></span><br></pre></td></tr></table></figure>
+<p>代表一个同时符合 Decodable 和 Encodable 协议的类型，即可解码且可编码的类型。</p>
+<p>Codable 也可以代表苹果为 Swift 开发的一套编解码系统，从 Swift 4 开始引入，包含了 Encoder 和 Decoder 协议和他们的两个实现 <code>JSONEncoder</code>、<code>JSONDecoder</code> 和 <code>PropertyListEncoder</code>、<code>PropertyListDecoder</code>。其中 Codable 及其相关协议放在了标准库中，而具体的 Encoder、Decoder 类放在了 <code>Foundation</code> 框架中。</p>
+<h1 id="Codable-的用法"><a href="#Codable-的用法" class="headerlink" title="Codable 的用法"></a>Codable 的用法</h1><p>Codable 是用来做系统自身数据结构和外部公共数据结构做转换的。系统内部数据结构可以是基础类型、结构体、枚举、类等，外部公共数据结构可以是 JSON、XML 等。</p>
+<h2 id="JSON-和-模型的相互转换"><a href="#JSON-和-模型的相互转换" class="headerlink" title="JSON 和 模型的相互转换"></a>JSON 和 模型的相互转换</h2><p>用 Objective-C 做 JSON 和模型转换时，一般要使用一些第三方库，这些第三方库基本上都是利用了 Objective-C Runtime 的强大特性来实现 JSON 和模型互转的。</p>
+<p>但是 Swift 是一门静态语言，本身是没有像 Objective-C 那样的动态 Runtime 的。虽然在 Swift 中也可以通过继承 NSObject 的方式，来使用基于 OC Runtime 的 JSON 模型互转方案。但是这样就很不 Swift，也放弃了 Swift 作为一门静态语言的高性能，等于说自己降低了整个项目的运行性能，这是无法忍受的。</p>
+<p>好在苹果提供了 <code>JSONEncoder</code> 和 <code>JSONDecoder</code> 这两个结构体来方便得在 JSON 数据和自定义模型之间互相转换。苹果可以利用一些系统私有的机制来实现转换，而不需要通过 <code>OC Runtime</code>。</p>
+<p>只要让自己的数据类型符合 Codable 协议，就可以用系统提供的编解码器进行编解码。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体编解码代码如下：</p>
+<h4 id="解码（JSON-Data-gt-Model）："><a href="#解码（JSON-Data-gt-Model）：" class="headerlink" title="解码（JSON Data -&gt; Model）："></a>解码（JSON Data -&gt; Model）：</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> json <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        &quot;name&quot;: &quot;zhangsan&quot;,</span></span><br><span class="line"><span class="string">        &quot;age&quot;: 25</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span>.data(using: .utf8)<span class="operator">!</span></span><br><span class="line"><span class="keyword">let</span> user <span class="operator">=</span> <span class="type">JSONDecoder</span>().decode(<span class="type">User</span>.<span class="keyword">self</span>, from: json)</span><br></pre></td></tr></table></figure>
+
+<h4 id="编码（Model-gt-JSON-Data）："><a href="#编码（Model-gt-JSON-Data）：" class="headerlink" title="编码（Model -&gt; JSON Data）："></a>编码（Model -&gt; JSON Data）：</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> data <span class="operator">=</span> <span class="type">JSONEncoder</span>().encode(user)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Codable-支持的数据类型"><a href="#Codable-支持的数据类型" class="headerlink" title="Codable 支持的数据类型"></a>Codable 支持的数据类型</h2><h3 id="基础数据类型"><a href="#基础数据类型" class="headerlink" title="基础数据类型"></a>基础数据类型</h3><p>在 Swift 标准库的声明文件中可以看到，基础类型都通过 <code>extension</code> 实现了 <code>Codable</code> 协议。</p>
+<p>对于基础类型的属性，JSONEncoder 和 JSONDecoder 都可以正确的处理。</p>
+<h3 id="Date"><a href="#Date" class="headerlink" title="Date"></a>Date</h3><p><code>JSONEncoder</code> 提供了 <code>dateEncodingStrategy</code> 属性来指定日期编码策略。<br>同样 <code>JSONDecoder</code> 提供了 <code>dateDecodingStrategy</code> 属性。</p>
+<p>就拿 <code>dateDecodingStrategy</code> 为例，它是一个枚举类型。枚举类型有以下几个 case:</p>
+<table>
+<thead>
+<tr>
+<th>case 名</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>case deferredToDate</code></td>
+<td>默认的 case</td>
+</tr>
+<tr>
+<td><code>case iso8601</code></td>
+<td>按照日期的 ios8601 标准来解码日期</td>
+</tr>
+<tr>
+<td><code>case formatted(DateFormatter)</code></td>
+<td>自定义日期解码策略，需要提供一个 DateFormatter 对象</td>
+</tr>
+<tr>
+<td><code>case custom((_ decoder: Decoder) throws -&gt; Date)</code></td>
+<td>自定义日期解码策略，需要提供一个 Decoder -&gt; Date 的闭包</td>
+</tr>
+</tbody></table>
+<p>通常使用比较多的就是 <code>.iso8601</code> 了，因为后端返回日期通常都是已 ios8601 格式返回的。只要 JSON 中的日期是 ios8601 规范的字符串，只要设置一行代码就能让 JSONDecoder 完成日期的解码。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">    <span class="keyword">var</span> birthday: <span class="type">Date</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> json <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    &#123;</span></span><br><span class="line"><span class="string">        &quot;name&quot;: &quot;zhangsan&quot;,</span></span><br><span class="line"><span class="string">        &quot;age&quot;: 25,</span></span><br><span class="line"><span class="string">        &quot;birthday&quot;: &quot;2022-09-12T10:25:41+00:00&quot;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span>.data(using: .utf8)<span class="operator">!</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> decoder <span class="operator">=</span> <span class="type">JSONDecoder</span>()</span><br><span class="line">decoder.dateDecodingStrategy <span class="operator">=</span> .iso8601</span><br><span class="line"><span class="keyword">let</span> user <span class="operator">=</span> decoder.decode(<span class="type">User</span>.<span class="keyword">self</span>, from: json)</span><br><span class="line"><span class="comment">// user.birthday 正确解码为 Date 类型</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="嵌套对象"><a href="#嵌套对象" class="headerlink" title="嵌套对象"></a>嵌套对象</h3><p>在自定义模型中嵌套对象的时候，只要这个嵌套对象也符合 Codable 协议，那整个对象就可以正常使用 <code>JSONEncoder</code> 和 <code>JSONDecoder</code> 编解码。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">UserInfo</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> info: <span class="type">UserInfo</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h3><p>枚举类型必须它的 RawValue 的类型是可解码的，并且 RawValue 的类型和 JSON 字段类型对应，即可正确解码。</p>
+<h2 id="自定义-CodingKeys"><a href="#自定义-CodingKeys" class="headerlink" title="自定义 CodingKeys"></a>自定义 CodingKeys</h2><p>自定义 CodingKeys 主要是两个目的</p>
+<ol>
+<li>当数据类型属性名和 JSON 中字段名不同时，做 key 的映射。</li>
+<li>通过在不添加某些字段的 case，来跳过某些字段的编解码过程。</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">    <span class="keyword">var</span> birthday: <span class="type">Date</span>?</span><br><span class="line"></span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">CodingKeys</span>: <span class="title class_">String</span>, <span class="title class_">CodingKey</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> name <span class="operator">=</span> <span class="string">&quot;userName&quot;</span></span><br><span class="line">        <span class="keyword">case</span> age <span class="operator">=</span> <span class="string">&quot;userAge&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>CodingKeys 必须是一个 RawValue 为 String 类型的枚举，并符合 <code>CodingKey</code> 协议。以上代码实现的效果为，为 name 和 age 字段做了 key 映射，让编解码过程中不包含 birthday 字段。</p>
+<h1 id="Codable-的原理"><a href="#Codable-的原理" class="headerlink" title="Codable 的原理"></a>Codable 的原理</h1><p>了解了 Codable 的用法，下面我们来看一看 Codable 的原理。</p>
+<h2 id="Decodable-协议"><a href="#Decodable-协议" class="headerlink" title="Decodable 协议"></a>Decodable 协议</h2><p>由于编码和解码的原理差不多只是方向不同，我们仅探索用的更多的解码过程。</p>
+<p>如果想让一个对象支持解码应该怎么做呢，当然是符合 Decodable 协议。我们先看看一个对象符合 Decodable 协议需要做哪些事情。</p>
+<p><code>Decodable</code> 协议的定义如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Decodable</span> &#123;</span><br><span class="line">    <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说只要实现一个传入 Decoder 参数的初始化方法，于是我们自己来实现 User。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Decodable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在要来看看怎样让 User 的两个属性的值能从 Decoder 这个对象得到。</p>
+<p>查看 <code>Decoder</code> 的定义，它是一个协议。<br>有两个属性：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> codingPath: [<span class="type">CodingKey</span>] &#123; <span class="keyword">get</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> userInfo: [<span class="type">CodingUserInfoKey</span> : <span class="keyword">Any</span>] &#123; <span class="keyword">get</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>还有三个方法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">container</span>&lt;<span class="type">Key</span>&gt;(<span class="params">keyedBy</span> <span class="params">type</span>: <span class="type">Key</span>.<span class="keyword">Type</span>) <span class="keyword">throws</span> -&gt; <span class="type">KeyedDecodingContainer</span>&lt;<span class="type">Key</span>&gt; <span class="keyword">where</span> <span class="type">Key</span> : <span class="type">CodingKey</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">unkeyedContainer</span>() <span class="keyword">throws</span> -&gt; <span class="type">UnkeyedDecodingContainer</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">singleValueContainer</span>() <span class="keyword">throws</span> -&gt; <span class="type">SingleValueDecodingContainer</span></span><br></pre></td></tr></table></figure>
+
+<p>会发现这三个方法返回的都是 XXXContainer，从字面上理解是个容器，容器里面一定是容纳了某些东西。</p>
+<h2 id="Container"><a href="#Container" class="headerlink" title="Container"></a>Container</h2><p>再查看这些 Container 的定义，会发现里面都有一系列 decode… 方法，来对各种类型进行 decode。</p>
+<p>一共有三种类型的 Container：</p>
+<table>
+<thead>
+<tr>
+<th>Container 类型</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SingleValueDecodingContainer</td>
+<td>代表容器中只保存了一个值</td>
+</tr>
+<tr>
+<td>KeyedDecodingContainer</td>
+<td>代表容器中保存的数据是按照键值对的形式保存的</td>
+</tr>
+<tr>
+<td>UnkeyedDecodingContainer</td>
+<td>代表容器中保存的数据是没有键的，也就是说，保存的数据是一个数组</td>
+</tr>
+</tbody></table>
+<p>回到上面 User 的例子，JSON 数据如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;user&quot;</span><span class="punctuation">:</span> <span class="string">&quot;zhangsan&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;age&quot;</span><span class="punctuation">:</span> <span class="number">25</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这种数据显然是键值对，因此要用 KeyedDecodingContainer 来取数据。KeyedDecodingContainer 应该是最常用的 Container 了。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Decodable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        decoder.container(keyedBy: <span class="operator">&lt;</span>#<span class="type">T</span>##<span class="type">CodingKey</span>.<span class="keyword">Protocol</span>#<span class="operator">&gt;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>参数需要传一个符合 CodingKey 协议的对象的类型，于是这里必须自己实现 CodingKeys 枚举，并把 CodingKeys.self 传入参数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">struct User: Decodable &#123;</span><br><span class="line">    var name: String</span><br><span class="line">    var age: Int</span><br><span class="line">    </span><br><span class="line">    enum CodingKeys: String, CodingKey &#123;</span><br><span class="line">        case name</span><br><span class="line">        case age</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    init(from decoder: Decoder) throws &#123;</span><br><span class="line">        let container = decoder.container(keyedBy: CodingKeys.self)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以从 container 中取数据出来赋给自身的属性。由于这几个方法都会抛出异常，因此都要加上 <code>try</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">    name <span class="operator">=</span> <span class="keyword">try</span> container.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .name)</span><br><span class="line">    age <span class="operator">=</span> <span class="keyword">try</span> container.decode(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .age)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样的，我们也可以实现出编码。这时把 User 实现的协议改成 <code>Codable</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">CodingKeys</span>: <span class="title class_">String</span>, <span class="title class_">CodingKey</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> name</span><br><span class="line">        <span class="keyword">case</span> age</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">        name <span class="operator">=</span> <span class="keyword">try</span> container.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .name)</span><br><span class="line">        age <span class="operator">=</span> <span class="keyword">try</span> container.decode(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .age)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> encoder <span class="operator">=</span> encoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">try</span> encoder.encode(name, forKey: .name)</span><br><span class="line">        <span class="keyword">try</span> encoder.encode(age, forKey: .age)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编码的过程就是和解码反过来，因为是键值对，从 encoder 中拿到 <code>KeyedEncoderContainer</code>，然后调用 encode 方法把属性的数据编码到 container 中，然后由 <code>JSONEncoder</code> 来处理接下来的事情。</p>
+<p>接下来我们好奇的是，Container 中的数据是怎么保存的，Container 中的数据和 JSON 又是怎么互相转换的。</p>
+<h2 id="核心原理分析（Container-lt-–-gt-JSON）"><a href="#核心原理分析（Container-lt-–-gt-JSON）" class="headerlink" title="核心原理分析（Container &lt;–&gt; JSON）"></a>核心原理分析（Container &lt;–&gt; JSON）</h2><h3 id="JSONDecoder-的解码过程"><a href="#JSONDecoder-的解码过程" class="headerlink" title="JSONDecoder 的解码过程"></a>JSONDecoder 的解码过程</h3><p>从 <code>JSONDecoder().decode(User.self, from: json)</code> 这句开始分析。打开 swift-corelibs-foundation 中 <code>JSONDecoder</code> 的源码。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1</span></span><br><span class="line"><span class="keyword">var</span> parser <span class="operator">=</span> <span class="type">JSONParser</span>(bytes: <span class="type">Array</span>(data))</span><br><span class="line"><span class="keyword">let</span> json <span class="operator">=</span> <span class="keyword">try</span> parser.parse()</span><br><span class="line"><span class="comment">// 2</span></span><br><span class="line"><span class="keyword">return</span> <span class="keyword">try</span> <span class="type">JSONDecoderImpl</span>(userInfo: <span class="keyword">self</span>.userInfo, from: json, codingPath: [], options: <span class="keyword">self</span>.options)</span><br><span class="line">    .unwrap(as: <span class="type">T</span>.<span class="keyword">self</span>) <span class="comment">// 3</span></span><br></pre></td></tr></table></figure>
+
+<p>decode 方法的实现主要是这三行代码。</p>
+<ol>
+<li>先把 data 转化为一个类型为 <code>JSONValue</code> 的 json 对象。</li>
+<li>然后构造一个 JSONDecoderImpl 对象</li>
+<li>调用 JSONDecoderImpl 对象的 <code>unwrap</code> 方法得到要转换成的对象。</li>
+</ol>
+<p>查看 <code>JSONValue</code> 的定义，它通过枚举嵌套把 JSON 的类型定义了出来。具体的数据通过关联值携带在了这个枚举类型中。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">JSONValue</span>: <span class="title class_">Equatable</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> string(<span class="type">String</span>)</span><br><span class="line">    <span class="keyword">case</span> number(<span class="type">String</span>)</span><br><span class="line">    <span class="keyword">case</span> bool(<span class="type">Bool</span>)</span><br><span class="line">    <span class="keyword">case</span> null</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> array([<span class="type">JSONValue</span>])</span><br><span class="line">    <span class="keyword">case</span> object([String: <span class="type">JSONValue</span>])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在获取 KeyedDecodingContainer 的时候也就是通过 JSONValue 构建 Container 对象。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里 self.json 是保存在 JSONDecoderImpl 中的 JSONValue 类型</span></span><br><span class="line"><span class="keyword">switch</span> <span class="keyword">self</span>.json &#123;</span><br><span class="line"><span class="keyword">case</span> .object(<span class="keyword">let</span> dictionary): <span class="comment">// JSONValue 和 .object 这个 case 匹配，取出字典数据</span></span><br><span class="line">    <span class="keyword">let</span> container <span class="operator">=</span> <span class="type">KeyedContainer</span>&lt;<span class="type">Key</span>&gt;(</span><br><span class="line">        impl: <span class="keyword">self</span>,</span><br><span class="line">        codingPath: codingPath,</span><br><span class="line">        dictionary: dictionary <span class="comment">// 传入字典数据</span></span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">return</span> <span class="type">KeyedDecodingContainer</span>(container)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，<code>KeyedDecodingContainer</code> 只有当 <code>self.json</code> 匹配为字典时才能正确创建。数据在里面以 <code>let dictionary: [String: JSONValue]</code> 形式保存。</p>
+<p>再看其他代码可以发现：</p>
+<p><code>SingleValueContainer</code> 就是直接存了一个 <code>let value: JSONValue</code> 在里面。</p>
+<p><code>UnkeyedDecodingContainer</code> 则是存了一个数组 <code>let array: [JSONValue]</code>。</p>
+<p>因此在 Container 调用 <code>decode</code> 方法获取数据时，就是根据参数 key 和类型从自身保存的数据中获取数据。这个源码很简单，看一下就明白了。</p>
+<p>最后一步的 unwrap 方法，通过源码可以看到，最终调用的就是对象自己实现的 <code>init(from decoder: Decoder)</code> 方法</p>
+<p>因此可以得出 <strong>JSON -&gt; Model 的步骤</strong>如下：</p>
+<ol>
+<li>JSONParser 对传入的二进制 JSON data 进行解析，解析为 JSONValue 对象。</li>
+<li>构建 JSONDecoderImpl，将相关的数据保存在里面。</li>
+<li>调用 JSONDecoderImpl 的 unwrap 方法，开始调用对象实现的 <code>init(from: decoder: Decoder)</code> 方法</li>
+<li>在 &#96;&#96;init(from: decoder: Decoder)&#96; 方法中，首先根据数据类型获取对应的 Container。</li>
+<li>调用 Container 的 decodeXXX 方法得到具体的值赋值给属性。</li>
+</ol>
+<p>Model -&gt; JSON 的步骤也是差不多的，只是方向反过来，有兴趣可以自己看一下源码。</p>
+<p>在 Swift 的 JSON 转模型方法中，通过观察 Github 上的开源库可以发现一共有三种实现方案：</p>
+<ul>
+<li><strong>Objective-C Runtime</strong> 一众本身就是 OC 开发的库基本都用的这个方案，比如 YYModel，这种方案使用起来非常简单，代码非常少，但不符合 Swift。</li>
+<li><strong>Key 映射</strong> 比如 ObjectMapper 就是这种，这种的缺点是每个对象都要写一大堆映射代码，比较麻烦</li>
+<li><strong>利用对象底层内存布局</strong> SwiftyJSON 就属于这种，这种方法使用起来一样很方便，但是依赖苹果的私有代码，苹果如果调整了内部实现就会失效。</li>
+</ul>
+<p>通过上面分析 Codable 原理发现，Codable 基本上就是 Key 映射的方案，只不过编译器帮我们自动合成了很多代码来让我们使用起来一样可以非常简单。由于编译器不会帮第三方库合成代码，因此 Codable 秒杀了一众基于 key 映射实现的第三方库。</p>
+<h2 id="编译器帮我们做了什么？"><a href="#编译器帮我们做了什么？" class="headerlink" title="编译器帮我们做了什么？"></a>编译器帮我们做了什么？</h2><p>我们发现，只要让自己的对象符合 Codable 协议，就可以正常用 <code>JSONEncoder</code> 和 <code>JSONDecoder</code> 编解码，并不需要实现协议中定义的方法。</p>
+<p>那是因为编译器帮我们生成了。这种编译器合成代码在很多地方都会用到，例如为结构体和枚举自动合成实现 Equatable 和 Hashable 的代码，为枚举合成实现 CaseIterable 的代码等。</p>
+<p>上面的 User 例子，编译器为我们合成的代码如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 编译器合成</span></span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">CodingKeys</span>: <span class="title class_">String</span>, <span class="title class_">CodingKey</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> name</span><br><span class="line">        <span class="keyword">case</span> age</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 编译器合成</span></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">        name <span class="operator">=</span> <span class="keyword">try</span> container.decode(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .name)</span><br><span class="line">        age <span class="operator">=</span> <span class="keyword">try</span> container.decode(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .age)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 编译器合成</span></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> container <span class="operator">=</span> encoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">        <span class="keyword">try</span> container.encode(name, forKey: .name)</span><br><span class="line">        <span class="keyword">try</span> container.encode(age, forKey: .age)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以见到，编译器自动合成了 CodingKeys 枚举的定义，并合成了实现 Encodable 和 Decodable 协议的代码。这给开发人员提供了方便。</p>
+<h1 id="默认值问题"><a href="#默认值问题" class="headerlink" title="默认值问题"></a>默认值问题</h1><p>编译器自动生成的编解码实现有个问题就是不支持默认值。如果需要支持默认值就需要自己来用 <code>decodeIfPresent</code> 来实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span>: <span class="title class_">Decodable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">CodingKeys</span>: <span class="title class_">String</span>, <span class="title class_">CodingKey</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> name</span><br><span class="line">        <span class="keyword">case</span> age</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.container(keyedBy: <span class="type">CodingKeys</span>.<span class="keyword">self</span>)</span><br><span class="line">        name <span class="operator">=</span> <span class="keyword">try</span> container.decodeIfPresent(<span class="type">String</span>.<span class="keyword">self</span>, forKey: .name) <span class="operator">??</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        age <span class="operator">=</span> <span class="keyword">try</span> container.decodeIfPresent(<span class="type">Int</span>.<span class="keyword">self</span>, forKey: .age) <span class="operator">??</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是这样每个结构体都要自己实现一次，非常麻烦。其实这个网上已经有很多文章在说了，就是用 <code>@propertyWrapper</code> 属性包装器来解决这个问题。</p>
+<h2 id="属性包装器-propertyWrapper"><a href="#属性包装器-propertyWrapper" class="headerlink" title="属性包装器 @propertyWrapper"></a>属性包装器 @propertyWrapper</h2><p>属性包装器用来给属性和定义属性的结构之间包装一层，用来实现一些通用的 setter 和 getter 逻辑或初始化逻辑等。</p>
+<p>例如对于 Int 型，可以如下定义属性包装器。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@propertyWrapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">DefaultInt</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">var</span> wrappedValue: <span class="type">Int</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.singleValueContainer()</span><br><span class="line">        wrappedValue <span class="operator">=</span> (<span class="keyword">try?</span> container.decode(<span class="type">BaseType</span>.<span class="keyword">self</span>)) <span class="operator">??</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> wrappedValue.encode(to: encoder)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码实现了 <code>init(from decoder: Decoder)</code> 方法来为属性在解码失败时提供一个默认值 0。实现 <code>encode(to encoder: Encoder)</code> 是为了编码时直接编码内部值而不是编码整个属性包装类型。</p>
+<p>其它的很多基础类型都是一样的逻辑，为了避免重复代码，可以用范型来统一实现。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">HasDefaultValue</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> defaultValue: <span class="keyword">Self</span> &#123; <span class="keyword">get</span> <span class="keyword">set</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@propertyWrapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">DefaultBaseType</span>&lt;<span class="title class_">BaseType</span>: <span class="title class_">Codable</span> &amp; <span class="title class_">HasDefaultValue</span>&gt;: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">var</span> wrappedValue: <span class="type">BaseType</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.singleValueContainer()</span><br><span class="line">        wrappedValue <span class="operator">=</span> (<span class="keyword">try?</span> container.decode(<span class="type">BaseType</span>.<span class="keyword">self</span>)) <span class="operator">??</span> <span class="type">BaseType</span>.defaultValue</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> wrappedValue.encode(to: encoder)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后可以考虑用类型别名来定义出各个类型的属性包装关键字。因为如果包含 <code>&lt;</code> 或 <code>.</code> 等字符，写起来会比较麻烦。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typealias</span> <span class="type">DefaultInt</span> <span class="operator">=</span> <span class="type">DefaultBaseType</span>&lt;<span class="type">Int</span>&gt;</span><br><span class="line"><span class="keyword">typealias</span> <span class="type">DefaultString</span> <span class="operator">=</span> <span class="type">DefaultBaseType</span>&lt;<span class="type">String</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>但是有些类型需要特殊实现一下。</p>
+<h3 id="枚举-1"><a href="#枚举-1" class="headerlink" title="枚举"></a>枚举</h3><p>枚举类型可以利用 rawValue 来进行数据和类型相互转换。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@propertyWrapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">DefaultIntEnum</span>&lt;<span class="title class_">Value</span>: <span class="title class_">RawRepresentable</span> &amp; <span class="title class_">HasDefaultEnumValue</span>&gt;: <span class="title class_">Codable</span> <span class="title class_">where</span> <span class="title class_">Value</span>.<span class="title class_">RawValue</span> == <span class="title class_">Int</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> intValue <span class="operator">=</span> <span class="type">Value</span>.defaultValue.rawValue</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">var</span> wrappedValue: <span class="type">Value</span> &#123;</span><br><span class="line">        <span class="keyword">get</span> &#123; <span class="type">Value</span>(rawValue: intValue)<span class="operator">!</span> &#125;</span><br><span class="line">        <span class="keyword">set</span> &#123; intValue <span class="operator">=</span> newValue.rawValue &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>() &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.singleValueContainer()</span><br><span class="line">        intValue <span class="operator">=</span> (<span class="keyword">try?</span> container.decode(<span class="type">Int</span>.<span class="keyword">self</span>)) <span class="operator">??</span> <span class="type">Value</span>.defaultValue.rawValue</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> intValue.encode(to: encoder)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h3><p>由于数组需要通过 UnkeyedDecodingContainer 拿数据，需要单独特殊处理。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@propertyWrapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">DefaultArray</span>&lt;<span class="title class_">Value</span>: <span class="title class_">Codable</span>&gt;: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">var</span> wrappedValue: [<span class="type">Value</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>() &#123;</span><br><span class="line">        wrappedValue <span class="operator">=</span> []</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="params">wrappedValue</span>: [<span class="type">Value</span>]) &#123;</span><br><span class="line">        <span class="keyword">self</span>.wrappedValue <span class="operator">=</span> wrappedValue</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="params">from</span> <span class="params">decoder</span>: <span class="type">Decoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> container <span class="operator">=</span> <span class="keyword">try</span> decoder.unkeyedContainer()</span><br><span class="line">        <span class="keyword">var</span> results <span class="operator">=</span> [<span class="type">Value</span>]()</span><br><span class="line">        <span class="keyword">while</span> <span class="operator">!</span>container.isAtEnd &#123;</span><br><span class="line">            <span class="keyword">let</span> value <span class="operator">=</span> <span class="keyword">try</span> container.decode(<span class="type">Value</span>.<span class="keyword">self</span>)</span><br><span class="line">            results.append(value)</span><br><span class="line">        &#125;</span><br><span class="line">        wrappedValue <span class="operator">=</span> results</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">func</span> <span class="title function_">encode</span>(<span class="params">to</span> <span class="params">encoder</span>: <span class="type">Encoder</span>) <span class="keyword">throws</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> wrappedValue.encode(to: encoder)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h3><p>因为对象的结构都是不一样的，没法给出一个的默认值。因此设计了一个 <code>EmptyInitializable</code> 协议，里面只有一个无参数的初始化方法。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">EmptyInitializable</span> &#123;</span><br><span class="line">    <span class="keyword">init</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>需要提供默认值的对象可以实现这个协议。不过这里需要权衡一下，如果对内存空间占用有比较高的要求，用可选值可能是更好的方案，因为一个空对象占用的空间和有数据的对象占用的空间是一样多的。</p>
+<h3 id="属性包装器的使用"><a href="#属性包装器的使用" class="headerlink" title="属性包装器的使用"></a>属性包装器的使用</h3><p>使用属性包装器封装各个类型后，只要像这样使用就可以了，decode 的时候就如果不存在对应字段数据属性就会初始化为默认值。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span> &#123;</span><br><span class="line">    <span class="meta">@DefaultString</span> <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="meta">@DefaultInt</span> <span class="keyword">var</span> age: <span class="type">Int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我简单封装了一个库，目前我们的新 Swift 项目在使用，完整代码在这里： <a target="_blank" rel="noopener" href="https://github.com/liuduoios/CodableDefaultValue">https://github.com/liuduoios/CodableDefaultValue</a></p>
+<h1 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h1><ul>
+<li>《the swift programming language》</li>
+<li>《Advanced Swift》</li>
+<li>swift-corelibs-foundation 源码</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/objectivec-ownership/" rel="next" title="探索 Objective-C 的对象所有权修饰符">
+                <i class="fa fa-chevron-left"></i> 探索 Objective-C 的对象所有权修饰符
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/solve-docker-hub-load-problem-on-synology/" rel="prev" title="在群辉上解决 Docker Hub 加载不出来的问题">
+                在群辉上解决 Docker Hub 加载不出来的问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Codable-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">Codable 是什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Codable-%E7%9A%84%E7%94%A8%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">Codable 的用法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON-%E5%92%8C-%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%9B%B8%E4%BA%92%E8%BD%AC%E6%8D%A2"><span class="nav-number">2.1.</span> <span class="nav-text">JSON 和 模型的相互转换</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E7%A0%81%EF%BC%88JSON-Data-gt-Model%EF%BC%89%EF%BC%9A"><span class="nav-number">2.1.0.1.</span> <span class="nav-text">解码（JSON Data -&gt; Model）：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%EF%BC%88Model-gt-JSON-Data%EF%BC%89%EF%BC%9A"><span class="nav-number">2.1.0.2.</span> <span class="nav-text">编码（Model -&gt; JSON Data）：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Codable-%E6%94%AF%E6%8C%81%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">Codable 支持的数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.2.1.</span> <span class="nav-text">基础数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Date"><span class="nav-number">2.2.2.</span> <span class="nav-text">Date</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%A5%97%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.2.3.</span> <span class="nav-text">嵌套对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%9A%E4%B8%BE"><span class="nav-number">2.2.4.</span> <span class="nav-text">枚举</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89-CodingKeys"><span class="nav-number">2.3.</span> <span class="nav-text">自定义 CodingKeys</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Codable-%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">Codable 的原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Decodable-%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.1.</span> <span class="nav-text">Decodable 协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container"><span class="nav-number">3.2.</span> <span class="nav-text">Container</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%EF%BC%88Container-lt-%E2%80%93-gt-JSON%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">核心原理分析（Container &lt;–&gt; JSON）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JSONDecoder-%E7%9A%84%E8%A7%A3%E7%A0%81%E8%BF%87%E7%A8%8B"><span class="nav-number">3.3.1.</span> <span class="nav-text">JSONDecoder 的解码过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%99%A8%E5%B8%AE%E6%88%91%E4%BB%AC%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">3.4.</span> <span class="nav-text">编译器帮我们做了什么？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%80%BC%E9%97%AE%E9%A2%98"><span class="nav-number">4.</span> <span class="nav-text">默认值问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E5%8C%85%E8%A3%85%E5%99%A8-propertyWrapper"><span class="nav-number">4.1.</span> <span class="nav-text">属性包装器 @propertyWrapper</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%9A%E4%B8%BE-1"><span class="nav-number">4.1.1.</span> <span class="nav-text">枚举</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">4.1.2.</span> <span class="nav-text">数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1"><span class="nav-number">4.1.3.</span> <span class="nav-text">对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E5%8C%85%E8%A3%85%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">4.1.4.</span> <span class="nav-text">属性包装器的使用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99%EF%BC%9A"><span class="nav-number">5.</span> <span class="nav-text">参考资料：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">晨曦微光</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">146k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点总阅读时长">2:26</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.2</div>
+
+
+<div>Hosted by <a target="_blank" rel="noopener" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'krbUxLGKWA6SjK4bKeeJcu8Q-gzGzoHsz',
+        appKey: 'G2GNz7MLppJZuew6PZbdiZhf',
+        placeholder: '填写评论内容',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("nGSnOI7jqHLeho9asFx6j3b9-gzGzoHsz", "r6e5CNQIXNTbVb7KFX4R5rxk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

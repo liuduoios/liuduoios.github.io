@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Swift," />
+
+
+<meta name="description" content="Swift 是一门可以让你按照自己喜欢的方式写代码的语言，它有很强的扩展能力，而它众多的 Collection Protocols 则是这种扩展能力的提供者之一。 本文介绍一下 Sequence 和 Iterator 的基本概念，及如何实现一个 Sequence。 撰写本文时的 Swift 版本是 Swift 3.1。 SequenceSequence 是一系列相同类型的值的集合，并且提供对这些值">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swift 中的 Sequence（一）">
+<meta property="og:url" content="https://liuduoios.github.io/sequence_base/index.html">
+<meta property="og:site_name" content="My Knowledge Library">
+<meta property="og:description" content="Swift 是一门可以让你按照自己喜欢的方式写代码的语言，它有很强的扩展能力，而它众多的 Collection Protocols 则是这种扩展能力的提供者之一。 本文介绍一下 Sequence 和 Iterator 的基本概念，及如何实现一个 Sequence。 撰写本文时的 Swift 版本是 Swift 3.1。 SequenceSequence 是一系列相同类型的值的集合，并且提供对这些值">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-05-26T10:34:08.000Z">
+<meta property="article:modified_time" content="2023-06-05T05:33:26.596Z">
+<meta property="article:author" content="晨曦微光">
+<meta property="article:tag" content="Swift">
+<meta name="twitter:card" content="summary">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="My Knowledge Library" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://liuduoios.github.io/sequence_base/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Swift 中的 Sequence（一） | My Knowledge Library</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">My Knowledge Library</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">个人博客</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/sequence_base/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My Knowledge Library">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Swift 中的 Sequence（一）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-26T18:34:08+08:00">2017-05-26</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Swift/" itemprop="url" rel="index"><span itemprop="name">Swift</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/sequence_base/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/sequence_base/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/sequence_base/" class="leancloud_visitors" data-flag-title="Swift 中的 Sequence（一）">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">12k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">12 mins.</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Swift 是一门可以让你按照自己喜欢的方式写代码的语言，它有很强的扩展能力，而它众多的 Collection Protocols 则是这种扩展能力的提供者之一。</p>
+<p>本文介绍一下 Sequence 和 Iterator 的基本概念，及如何实现一个 Sequence。</p>
+<p>撰写本文时的 Swift 版本是 Swift 3.1。</p>
+<h1 id="Sequence"><a href="#Sequence" class="headerlink" title="Sequence"></a>Sequence</h1><p>Sequence 是一系列相同类型的值的集合，并且提供对这些值的迭代能力。</p>
+<p>迭代一个 Sequence 最常见的方式就是 <code>for-in</code> 循环，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for element in someSequence &#123;</span><br><span class="line">    doSomething(with: element)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们经常把 <code>for-in</code> 循环用在 Array、Dictioanry、Set 等数据结构上，因为他们都实现了 Sequence 协议。</p>
+<p><strong>Sequence 协议的定义：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">protocol Sequence &#123;</span><br><span class="line">    associatedtype Iterator: IteratorProtocol</span><br><span class="line">    func makeIterator() -&gt; Iterator</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Sequence 协议只有一个必须实现的方法 <code>makeIterator()</code></p>
+<p><code>makeIterator()</code> 需要返回一个 Iterator，它是一个 IteratorProtocol 类型。</p>
+<p>也就是说只要提供一个 Iterator 就能实现一个 Sequence，那么 Iterator 又是什么呢？</p>
+<h1 id="Iterator"><a href="#Iterator" class="headerlink" title="Iterator"></a>Iterator</h1><p>Iterator 在 Swift 3.1 标准库中即为 IteratorProtocol，它用来为 Sequence 提供迭代能力。对于 Sequence，我们可以用 <code>for-in</code> 来迭代其中的元素，其实 <code>for-in</code> 的背后是 IteratorProtocol 在起作用。</p>
+<p><strong>IteratorProtocol 的定义如下：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public protocol IteratorProtocol &#123;</span><br><span class="line">    associatedtype Element</span><br><span class="line">    public mutating func next() -&gt; Self.Element?</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中仅声明了一个 <code>next()</code> 方法，用来返回 Sequence 中的下一个元素，或者当没有下一个元素时返回 <code>nil</code>。<br>associatedtype 声明了元素的类型。</p>
+<p>举个例子，创建一个动物的数组，对齐进行循环遍历：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">let animals = [&quot;Antelope&quot;, &quot;Butterfly&quot;, &quot;Camel&quot;, &quot;Dolphin&quot;]</span><br><span class="line">for animal in animals &#123;</span><br><span class="line">    print(animal)</span><br><span class="line">&#125;</span><br><span class="line">// 打印结果：</span><br><span class="line">Antelope</span><br><span class="line">Butterfly</span><br><span class="line">Camel</span><br><span class="line">Dolphin</span><br></pre></td></tr></table></figure>
+
+<p>实际上编译器会把以上代码转换成下面的代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">var animalIterator = animals.makeIterator()</span><br><span class="line">while let animal = animalIterator.next() &#123;</span><br><span class="line">    print(animal)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>获取到 animals 数组的 Iterator</li>
+<li>在一个 while 循环中，通过 Iterator 不断获取下一个元素，并对元素进行操作</li>
+<li>当 <code>next()</code> 返回 <code>nil</code> 时，退出循环</li>
+</ol>
+<h1 id="Iterator-实现举例"><a href="#Iterator-实现举例" class="headerlink" title="Iterator 实现举例"></a>Iterator 实现举例</h1><h2 id="举例1：最简单的-Iterator"><a href="#举例1：最简单的-Iterator" class="headerlink" title="举例1：最简单的 Iterator"></a>举例1：最简单的 Iterator</h2><p>最简单的 Iterator 实现就是在 <code>next()</code> 中返回 <code>nil</code>，代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">struct SimplestIterator: IteratorProtocol &#123;</span><br><span class="line">    typealias Element = Int</span><br><span class="line">    mutating func next() -&gt; Int? &#123;</span><br><span class="line">        return nil</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这时这个 Iterator 不会迭代出任何元素，确切的说，这个 Interator 在迭代时仅调用一次 <code>next()</code> 就结束了。</p>
+<h2 id="举例2：常量-Iterator"><a href="#举例2：常量-Iterator" class="headerlink" title="举例2：常量 Iterator"></a>举例2：常量 Iterator</h2><p>让 <code>next()</code> 返回一个值，也是一种简单的实现，例如下面代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">struct ConstantIterator: IteratorProtocol &#123;</span><br><span class="line">    typealias Element = Int</span><br><span class="line">    mutating func next() -&gt; Int? &#123;</span><br><span class="line">        return 1</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这个例子实现了一个只返回 1 的 Iterator。</p>
+<h2 id="举例3：斐波那契数列-Iterator"><a href="#举例3：斐波那契数列-Iterator" class="headerlink" title="举例3：斐波那契数列 Iterator"></a>举例3：斐波那契数列 Iterator</h2><p>再看一个复杂一点的例子，斐波那契数列的实现：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct FibsIterator: IteratorProtocol &#123;</span><br><span class="line">    var state = (0, 1)</span><br><span class="line">    mutating func next() -&gt; Int? &#123;</span><br><span class="line">        let upcomingNumber = state.0</span><br><span class="line">        state = (state.1, state.0 + state.1)</span><br><span class="line">        return upcomingNumber</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>state 具有一个初始值 (0, 1)，用元组表示</li>
+<li>每次调用 <code>next()</code> 时，返回 state 元组中的第一个元素，然后更新 state 为 （第二个元素的值，第一个元素 + 第二个元素的和）</li>
+</ol>
+<p>在实现 Iterator 时可以省略 Element 的类型声明，Swift 会通过 next() 的返回值类型来自动推导出 Element 的类型。不过对于实现比较复杂的 Iterator，往往还是会加上类型声明这一句，提高代码可读性。</p>
+<h1 id="实现一个-Sequence"><a href="#实现一个-Sequence" class="headerlink" title="实现一个 Sequence"></a>实现一个 Sequence</h1><p>实现一个 Sequence 首先要实现一个 Iterator。</p>
+<p>我们准备实现这样的一个 Iterator：它接收一个字符串数组，并可以迭代这个数组中所有字符串的首字母。<br>当数组中的最后一个字符串迭代完毕后，退出迭代。</p>
+<p>代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">struct FirstLetterIterator: IteratorProtocol &#123;</span><br><span class="line">    let strings: [String]</span><br><span class="line">    var offset: Int</span><br><span class="line">	</span><br><span class="line">    init(strings: [String]) &#123;</span><br><span class="line">        self.strings = strings</span><br><span class="line">        offset = 0</span><br><span class="line">    &#125;</span><br><span class="line">	</span><br><span class="line">    mutating func next() -&gt; String? &#123;</span><br><span class="line">        guard offset &lt; strings.endIndex else &#123; return nil &#125;</span><br><span class="line">        let string = strings[offset]</span><br><span class="line">        offset += 1</span><br><span class="line">        return string.substring(to: string.index(string.startIndex, offsetBy: 1))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>这个 Iterator 的需要输入一个字符串数组</li>
+<li>在 <code>next()</code> 中，判断边界，并返回数组中索引为 offset 的字符串的首字母，并把 offset 加 1</li>
+</ol>
+<p>这里省去了 Element 类型的声明，编译器可以根据 next() 的返回值类型推断出 Element 的类型。</p>
+<p>有了已经实现好的 Iterator，就可以很简单的用它实现 Sequence，在 <code>makeIterator()</code> 中返回这个 Iterator 即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct FirstLetterSequence: Sequence &#123;</span><br><span class="line">    let strings: [String]</span><br><span class="line">	</span><br><span class="line">    func makeIterator() -&gt; FirstLetterIterator &#123;</span><br><span class="line">        return FirstLetterIterator(strings: strings)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在 Sequence 已经实现好了，可以测试一下效果。<br>我们可以创建一个 FirstLetterSequence，并用 <code>for-in</code> 循环对其迭代：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">for letter in FirstLetterSequence(strings: [&quot;apple&quot;, &quot;banana&quot;, &quot;orange&quot;]) &#123;</span><br><span class="line">    print(letter)</span><br><span class="line">&#125;</span><br><span class="line">/* 打印结果：</span><br><span class="line">a</span><br><span class="line">b</span><br><span class="line">o</span><br><span class="line">*/</span><br></pre></td></tr></table></figure>
+
+<p>结果为打印出了数组中每个字符串的首字母。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://developer.apple.com/reference/swift/iteratorprotocol">https://developer.apple.com/reference/swift/iteratorprotocol</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.apple.com/reference/swift/sequence">https://developer.apple.com/reference/swift/sequence</a></li>
+<li>《Advanced Swift》by <a target="_blank" rel="noopener" href="https://www.objc.io/books/advanced-swift/">objc.io</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Swift/" rel="tag"># Swift</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/moduleproject/" rel="next" title="Swift 模块化项目结构最佳实践">
+                <i class="fa fa-chevron-left"></i> Swift 模块化项目结构最佳实践
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/sequence_advanced/" rel="prev" title="Swift 中的 Sequence（二）">
+                Swift 中的 Sequence（二） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Sequence"><span class="nav-number">1.</span> <span class="nav-text">Sequence</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Iterator"><span class="nav-number">2.</span> <span class="nav-text">Iterator</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Iterator-%E5%AE%9E%E7%8E%B0%E4%B8%BE%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">Iterator 实现举例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B1%EF%BC%9A%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84-Iterator"><span class="nav-number">3.1.</span> <span class="nav-text">举例1：最简单的 Iterator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B2%EF%BC%9A%E5%B8%B8%E9%87%8F-Iterator"><span class="nav-number">3.2.</span> <span class="nav-text">举例2：常量 Iterator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B3%EF%BC%9A%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97-Iterator"><span class="nav-number">3.3.</span> <span class="nav-text">举例3：斐波那契数列 Iterator</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA-Sequence"><span class="nav-number">4.</span> <span class="nav-text">实现一个 Sequence</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">晨曦微光</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">146k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点总阅读时长">2:26</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.2</div>
+
+
+<div>Hosted by <a target="_blank" rel="noopener" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'krbUxLGKWA6SjK4bKeeJcu8Q-gzGzoHsz',
+        appKey: 'G2GNz7MLppJZuew6PZbdiZhf',
+        placeholder: '填写评论内容',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("nGSnOI7jqHLeho9asFx6j3b9-gzGzoHsz", "r6e5CNQIXNTbVb7KFX4R5rxk");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
