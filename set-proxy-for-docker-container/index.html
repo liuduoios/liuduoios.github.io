@@ -100,24 +100,26 @@
 
 
   
-  <meta name="keywords" content="sqlite," />
+  <meta name="keywords" content="Docker,群辉,代理," />
 
 
-<meta name="description" content="锁机制SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。 SQLite的数据库连接有5种状态：    状态 对应的锁    未加锁 —   共享（shared） 共享锁   预留（reserved） 预留锁   未决（pending） 未">
+<meta name="description" content="有时候需要在 Docker 容器中调用一些被墙了的服务，这时就需要给容器设置代理。 步骤1：部署 Clash在群辉中部署一个 Clash 服务，可以参考 在群辉上解决 Docker Hub 加载不出来的问题 这篇文章，里面有详细介绍。 步骤2：设置 Docker 容器的代理然后新建一个容器，选择需要的映像。在设置网络这一步，需要选择 host，即和主机共享同一个网络。  使用 host 模式在安全">
 <meta property="og:type" content="article">
-<meta property="og:title" content="浅析SQLite的锁机制和WAL技术">
-<meta property="og:url" content="https://liuduoios.github.io/sqlitelockandwal/index.html">
+<meta property="og:title" content="在群辉中给 Docker 容器设置代理">
+<meta property="og:url" content="https://liuduoios.github.io/set-proxy-for-docker-container/index.html">
 <meta property="og:site_name" content="My Knowledge Library">
-<meta property="og:description" content="锁机制SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。 SQLite的数据库连接有5种状态：    状态 对应的锁    未加锁 —   共享（shared） 共享锁   预留（reserved） 预留锁   未决（pending） 未">
+<meta property="og:description" content="有时候需要在 Docker 容器中调用一些被墙了的服务，这时就需要给容器设置代理。 步骤1：部署 Clash在群辉中部署一个 Clash 服务，可以参考 在群辉上解决 Docker Hub 加载不出来的问题 这篇文章，里面有详细介绍。 步骤2：设置 Docker 容器的代理然后新建一个容器，选择需要的映像。在设置网络这一步，需要选择 host，即和主机共享同一个网络。  使用 host 模式在安全">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://liuduoios.github.io/%5C%E6%B5%85%E6%9E%90SQLite%E7%9A%84%E9%94%81%E6%9C%BA%E5%88%B6%E5%92%8CWAL%E6%8A%80%E6%9C%AF%5Cread.png">
-<meta property="og:image" content="https://liuduoios.github.io/%5C%E6%B5%85%E6%9E%90SQLite%E7%9A%84%E9%94%81%E6%9C%BA%E5%88%B6%E5%92%8CWAL%E6%8A%80%E6%9C%AF%5Cwrite.png">
-<meta property="article:published_time" content="2016-04-02T04:56:49.000Z">
-<meta property="article:modified_time" content="2023-06-05T05:33:26.597Z">
+<meta property="og:image" content="https://liuduoios.github.io/set-proxy-for-docker-container/image-20230608122659710.png">
+<meta property="og:image" content="https://liuduoios.github.io/set-proxy-for-docker-container/image-20230608123114470.png">
+<meta property="article:published_time" content="2023-06-08T04:18:46.000Z">
+<meta property="article:modified_time" content="2023-06-08T04:40:37.578Z">
 <meta property="article:author" content="晨曦微光">
-<meta property="article:tag" content="sqlite">
+<meta property="article:tag" content="Docker">
+<meta property="article:tag" content="群辉">
+<meta property="article:tag" content="代理">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://liuduoios.github.io/%5C%E6%B5%85%E6%9E%90SQLite%E7%9A%84%E9%94%81%E6%9C%BA%E5%88%B6%E5%92%8CWAL%E6%8A%80%E6%9C%AF%5Cread.png">
+<meta name="twitter:image" content="https://liuduoios.github.io/set-proxy-for-docker-container/image-20230608122659710.png">
 
 
 
@@ -126,7 +128,7 @@
 
 
 
-  <link rel="canonical" href="https://liuduoios.github.io/sqlitelockandwal/"/>
+  <link rel="canonical" href="https://liuduoios.github.io/set-proxy-for-docker-container/"/>
 
 
 
@@ -135,7 +137,7 @@
     sidebar: "",
   };
 </script>
-  <title>浅析SQLite的锁机制和WAL技术 | My Knowledge Library</title>
+  <title>在群辉中给 Docker 容器设置代理 | My Knowledge Library</title>
   
 
 
@@ -282,7 +284,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/sqlitelockandwal/">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/set-proxy-for-docker-container/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -299,7 +301,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">浅析SQLite的锁机制和WAL技术</h1>
+          <h1 class="post-title" itemprop="name headline">在群辉中给 Docker 容器设置代理</h1>
         
 
         <div class="post-meta">
@@ -311,7 +313,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-02T12:56:49+08:00">2016-04-02</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-06-08T12:18:46+08:00">2023-06-08</time>
             
 
             
@@ -332,7 +334,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">本地数据存储</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a></span>
 
                 
                 
@@ -347,8 +349,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/sqlitelockandwal/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/sqlitelockandwal/" itemprop="commentCount"></span>
+                <a href="/set-proxy-for-docker-container/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/set-proxy-for-docker-container/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -356,7 +358,7 @@
 
           
           
-             <span id="/sqlitelockandwal/" class="leancloud_visitors" data-flag-title="浅析SQLite的锁机制和WAL技术">
+             <span id="/set-proxy-for-docker-container/" class="leancloud_visitors" data-flag-title="在群辉中给 Docker 容器设置代理">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -386,7 +388,7 @@
                 
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
-                <span title="字数统计">3.2k</span>
+                <span title="字数统计">1k</span>
               
 
               
@@ -400,7 +402,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">3 mins.</span>
+                <span title="阅读时长">1 mins.</span>
               
             </div>
           
@@ -420,112 +422,15 @@
       
 
       
-        <h1 id="锁机制"><a href="#锁机制" class="headerlink" title="锁机制"></a>锁机制</h1><p>SQLite基于锁来实现并发控制。SQLite的锁是粗粒度的，并不拥有PostgreSQL那样细粒度的行锁，这也使得SQLite较为轻量级。当一个连接要写数据库时，所有其它的连接都被锁住，直到写连接结束它的事务。</p>
-<p>SQLite的数据库连接有5种状态：</p>
-<table>
-<thead>
-<tr>
-<th>状态</th>
-<th>对应的锁</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>未加锁</td>
-<td>—</td>
-</tr>
-<tr>
-<td>共享（shared）</td>
-<td>共享锁</td>
-</tr>
-<tr>
-<td>预留（reserved）</td>
-<td>预留锁</td>
-</tr>
-<tr>
-<td>未决（pending）</td>
-<td>未决锁</td>
-</tr>
-<tr>
-<td>排它（exclusive）</td>
-<td>排它锁</td>
-</tr>
-</tbody></table>
-<p>SQL使用锁逐步提升机制，上面的表格从上到下，对应锁的等级逐步提升，等级越高权限就越大。</p>
-<p><strong>未加锁：</strong><br>未和数据库建立连接、已建立连接但是还没访问数据库、已用BEGIN开始了一个事务但未开始读写数据库，处于这些情形时是未加锁状态。</p>
-<p><strong>共享：</strong><br>连接需要从数据库中读取数据时，需要申请获得一个共享锁，如果获得成功，则进入共享状态。</p>
-<p><strong>预留：</strong><br>连接需要写数据库时，首先申请一个预留锁，一个数据库同时只能有一个预留锁，预留锁可以与共享锁共存。获得预留锁后进入预留状态，这时会先在缓冲区中进行需要的修改、更新操作，操作后的结果依然保存在缓冲区中，未真正写入数据库。</p>
-<p><strong>未决：</strong><br>连接从预留升为排它前，需要先升为未决，这时其它连接就不能获得共享锁了，但已经拥有共享锁的连接仍然可以继续正常读数据库，此时，拥有未决锁的连接等待其它拥有共享锁的连接完成工作并释放其共享锁后，提成到排它锁。</p>
-<p><strong>排它：</strong><br>连接需要提交修改时，需要将预留锁升为排它锁，这时其它连接都无法获得任何锁，直到当前连接的排它状态结束。</p>
-<p><strong>一个连接读数据的流程如下：</strong></p>
-<p><img src="/%5C%E6%B5%85%E6%9E%90SQLite%E7%9A%84%E9%94%81%E6%9C%BA%E5%88%B6%E5%92%8CWAL%E6%8A%80%E6%9C%AF%5Cread.png"></p>
-<p><strong>一个连接写数据的流程如下：</strong></p>
-<p><img src="/%5C%E6%B5%85%E6%9E%90SQLite%E7%9A%84%E9%94%81%E6%9C%BA%E5%88%B6%E5%92%8CWAL%E6%8A%80%E6%9C%AF%5Cwrite.png"></p>
-<h1 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h1><p>在使用事务的情况下，SQLite的锁机制存在死锁的可能性。<br>见下面例子：</p>
-<table>
-<thead>
-<tr>
-<th>执行顺序</th>
-<th>连接A</th>
-<th>连接B</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>BEGIN;</td>
-<td></td>
-</tr>
-<tr>
-<td>2</td>
-<td></td>
-<td>BEGIN;</td>
-</tr>
-<tr>
-<td>3</td>
-<td></td>
-<td>INSERT INTO foo VALUES (‘x’);</td>
-</tr>
-<tr>
-<td>4</td>
-<td>SELECT * FROM foo;</td>
-<td></td>
-</tr>
-<tr>
-<td>5</td>
-<td></td>
-<td>COMMIT;</td>
-</tr>
-<tr>
-<td>6</td>
-<td></td>
-<td>SQL error: database is locked</td>
-</tr>
-<tr>
-<td>7</td>
-<td>INSERT INTO foo VALUES (‘x’);</td>
-<td></td>
-</tr>
-<tr>
-<td>8</td>
-<td>SQL error: database is locked</td>
-<td></td>
-</tr>
-</tbody></table>
-<p>执行顺序3：连接B要执行写操作，获得预留锁<br>执行顺序4：连接A要执行读操作，获得共享锁<br>执行顺序5：连接B要提交修改，预留锁升级为未决锁<br>执行顺序6：连接B想要升级为排它锁，必须先等待连接A释放共享锁<br>执行顺序7：连接A要执行写操作，需要获得预留锁<br>执行顺序8：连接A获得预留锁失败，必须先等待连接B释放未决锁<br>于是连接A和连接B相互等待对方，发生死锁。</p>
-<p>可以通过正确的使用事务类型来解决以上死锁问题，这里不再陈述。</p>
-<h1 id="WAL技术"><a href="#WAL技术" class="headerlink" title="WAL技术"></a>WAL技术</h1><p>SQLite在3.7.0开始引入了WAL技术，全称叫Write Ahead Log（预写日志）。</p>
-<p>其原理是：修改并不直接写入到数据库文件中，而是写入到另外一个称为WAL的文件中；如果事务失败，WAL中的记录会被忽略，撤销修改；如果事务成功，它将在随后的某个时间被写回到数据库文件中，提交修改。</p>
-<p>WAL使用检查点将修改写回数据库，默认情况下，当WAL文件发现有1000页修改时，将自动调用检查点。这个页数大小可以自行配置。</p>
-<p><strong>WAL技术带来以下优点：</strong></p>
-<ul>
-<li>读写操作不再互相阻塞，一定程度上解决了SQLite在处理高并发上的性能瓶颈</li>
-<li>大多数场景中，带来很大的性能提升</li>
-<li>磁盘I&#x2F;O行为更容易被预测</li>
-</ul>
-<p>WAL也有一些缺点，不过在iOS开发中影响不大，除非数据达到GB级时，性能才会降低。</p>
-<p><strong>如何启用WAL：</strong><br>如果是直接使用SQLite，需要设置如下编译指示：  </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PRAGMA journal_mode=WAL;</span><br></pre></td></tr></table></figure>
-
-<p>如果是使用Core Data，则已经默认开启了WAL模式。</p>
+        <p>有时候需要在 Docker 容器中调用一些被墙了的服务，这时就需要给容器设置代理。</p>
+<h2 id="步骤1：部署-Clash"><a href="#步骤1：部署-Clash" class="headerlink" title="步骤1：部署 Clash"></a>步骤1：部署 Clash</h2><p>在群辉中部署一个 Clash 服务，可以参考 <a href="https://liuduoios.github.io/solve-docker-hub-load-problem-on-synology/">在群辉上解决 Docker Hub 加载不出来的问题</a> 这篇文章，里面有详细介绍。</p>
+<h2 id="步骤2：设置-Docker-容器的代理"><a href="#步骤2：设置-Docker-容器的代理" class="headerlink" title="步骤2：设置 Docker 容器的代理"></a>步骤2：设置 Docker 容器的代理</h2><p>然后新建一个容器，选择需要的映像。在设置网络这一步，需要选择 host，即和主机共享同一个网络。</p>
+<p><img src="/set-proxy-for-docker-container/image-20230608122659710.png" alt="image-20230608122659710"></p>
+<p>使用 host 模式在安全上可能会有一定的风险。我先尝试的是 bridge，这种模式下容器会拥有一个独立的网络空间，我尝试了很多办法都没有成功的让容器访问到主机的 Clash 服务，看网上有人说可以用 iptables 将容器的所有流量转发给 Clash，这个我没有尝试。如果有了解的或者知道其它方法的朋友们，希望能留言指点一下。</p>
+<p>下一步到常规设置，在这里选择高级设置，在高级设置的环境选项卡中设置环境变量。</p>
+<p><img src="/set-proxy-for-docker-container/image-20230608123114470.png" alt="image-20230608123114470"></p>
+<p>如果是之前已经创建好的容器，也可以随时点击编辑，在里面设置网络和环境变量。</p>
+<p>然后启动容器，容器就可以通过本机上的 Clash 代理来访问网络了。</p>
 
       
     </div>
@@ -543,7 +448,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/sqlite/" rel="tag"># sqlite</a>
+            <a href="/tags/Docker/" rel="tag"># Docker</a>
+          
+            <a href="/tags/%E7%BE%A4%E8%BE%89/" rel="tag"># 群辉</a>
+          
+            <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag"># 代理</a>
           
         </div>
       
@@ -556,8 +465,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/gointocoredata/" rel="next" title="走进Core Data的世界">
-                <i class="fa fa-chevron-left"></i> 走进Core Data的世界
+              <a href="/solve-docker-hub-load-problem-on-synology/" rel="next" title="在群辉上解决 Docker Hub 加载不出来的问题">
+                <i class="fa fa-chevron-left"></i> 在群辉上解决 Docker Hub 加载不出来的问题
               </a>
             
           </div>
@@ -565,10 +474,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/rxswiftmoyanetwork/" rel="prev" title="用 RxSwift + Moya 写出优雅的网络请求代码">
-                用 RxSwift + Moya 写出优雅的网络请求代码 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -754,7 +659,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%94%81%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">锁机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AD%BB%E9%94%81"><span class="nav-number">2.</span> <span class="nav-text">死锁</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#WAL%E6%8A%80%E6%9C%AF"><span class="nav-number">3.</span> <span class="nav-text">WAL技术</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A41%EF%BC%9A%E9%83%A8%E7%BD%B2-Clash"><span class="nav-number">1.</span> <span class="nav-text">步骤1：部署 Clash</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A42%EF%BC%9A%E8%AE%BE%E7%BD%AE-Docker-%E5%AE%B9%E5%99%A8%E7%9A%84%E4%BB%A3%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">步骤2：设置 Docker 容器的代理</span></a></li></ol></div>
             
 
           </div>
