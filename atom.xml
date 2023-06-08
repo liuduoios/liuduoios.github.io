@@ -6,7 +6,7 @@
   <link href="https://liuduoios.github.io/atom.xml" rel="self"/>
   
   <link href="https://liuduoios.github.io/"/>
-  <updated>2023-06-08T05:51:40.961Z</updated>
+  <updated>2023-06-08T05:55:16.807Z</updated>
   <id>https://liuduoios.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://liuduoios.github.io/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/"/>
     <id>https://liuduoios.github.io/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/</id>
     <published>2023-06-08T04:46:56.000Z</published>
-    <updated>2023-06-08T05:51:40.961Z</updated>
+    <updated>2023-06-08T05:55:16.807Z</updated>
     
     <content type="html"><![CDATA[<p>用 Markdown 写文章时在文章中插入图片经常是一件很麻烦的事情，那么有没有办法将这件事情变的愉快呢，本文或许能对你有一些帮助。</p><h2 id="打开-Hexo-的文章资源文件夹开关"><a href="#打开-Hexo-的文章资源文件夹开关" class="headerlink" title="打开 Hexo 的文章资源文件夹开关"></a>打开 Hexo 的文章资源文件夹开关</h2><p>Hexo 中，用资源（Asset）来代表除了文章以外的所有文件类型，例如图片、CSS、JS 文件等。如果写文章时需要使用到的图片较少，可以在 source 中建立一个 images 文件夹，把所有需要的图片都放在这个文件夹中，然后通过 <code>![](/images/image.jpg)</code> 的方式来引用图片。</p><p>如果图片比较多，就需要一种更好的图片管理方式，Hexo 也提供了一种更组织化的方式来管理资源。可以通过将 <code>config.yml</code> 文件中的 <code>post_asset_folder</code> 选项设为 <code>true</code> 来打开。</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">post_asset_folder:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure><p>这个功能打开后，每次使用 <code>hexo new &lt;title&gt;</code> 创建新文章时，会自动在 source&#x2F;_posts 目录中创建一个和文章同名的文件夹，所有和文章相关的资源都可以放在这个文件夹中，并通过相对路径来引用他们。</p><p>然而由于 Hexo 内的文件在部署以后路径会改变，在本地写文章时使用的路径，在部署后就变成一个无法找到的路径了，造成图片显示不出来。Hexo 通过一个标签插件语法来解决这个问题，需要把引入图片的方式从 <code>![]()</code> 改为：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;% asset_img image.jpg This is a image. %&#125;</span><br></pre></td></tr></table></figure><p>通过使用 asset_img 这个命令，Hexo 会正确地找到图片 image.jpg 的路径，从而将图片显示出来。</p><p>但是这种方式在本地编写文章时无法看到图片的效果，编写起来也不太方便，也不能很好的配合 Markdown 编辑器来使用。我们还是希望使用标准的 Markdown 语法来引入图片。</p><p>那么就可以使用 <a href="https://github.com/hexojs/hexo-renderer-marked">hexo-renderer-marked</a> 这个模块，使用以下命令来安装：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-renderer-marked --save</span><br></pre></td></tr></table></figure><p>然后在 <code>_config.yml</code> 中配置以下来启用：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">post_asset_folder: true</span><br><span class="line">marked:</span><br><span class="line">  prependRoot: true</span><br><span class="line">  postAsset: true</span><br></pre></td></tr></table></figure><p>启用这个模块后，图片会被解析为其对应文章的相对路径，例如文章 xxxx 有一张图片 image.jpg，<code>![](image.jpg)</code> 会被解析为 <code>&lt;img src=&quot;/xxxx/image.jpg&quot; /&gt;</code>。</p><h2 id="使用-Typora-编辑器"><a href="#使用-Typora-编辑器" class="headerlink" title="使用 Typora 编辑器"></a>使用 Typora 编辑器</h2><p>都说 Typora 是最好用的 Markdown 编辑器之一，我尝试了一下，确实很好用，除了它简洁的界面和美观的渲染效果以外，图片插入是一个非常好用的功能。</p><p>Typora 的官网是 <a href="https://typora.io/">Typora — a markdown editor, markdown reader.</a>，这是一个收费软件，如果有能力，建议支持正版。</p><p>在文章中插入图片最好的方式就是粘贴或者拖拽，Typora 对这两个操作都有很好的支持，那么我们再看看它是怎样和 Hexo 很好地结合起来的。</p><p>Typora 对插入图片的行为可以做一些配置，其设置界面如下：</p><p><img src="/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/image-20230608131748378.png" alt="image-20230608131748378"></p><p>那么可以设置为将粘贴或拖拽进来的图片自动复制到文章的资源目录下，如上图所示，插入图片时的行为设置成<strong>复制到指定路径</strong>，然后填入 <code>./$&#123;filename&#125;</code>，这里的 <code>$&#123;filename&#125;</code> 代表当前正在编辑的 Markdown 文件的文件名。勾选上优先使用相对路径。</p><p>这样粘贴或拖拽进来图片时，图片会被自动复制到文章资源目录下，同时在 Markdown 文件中生成一条 <code>![xxxx](xxxx/image.jpg)</code>，并能在 Markdown 中立刻看到图片。</p><p>不过如果使用 <code>xxxx/image.jpg</code> 这个路径，上文提到的 hexo-renderer-marked 模块是找不到正确图片路径的，必须用 <code>image.jpg</code> 才行。因此需要在文章编写完成后，进行一次查找替换，将所有的 “xxxx&#x2F;“ 替换成空即可。这里的 xxxx 都带入成你的文章名。</p><h2 id="找一个好用的屏幕截图工具"><a href="#找一个好用的屏幕截图工具" class="headerlink" title="找一个好用的屏幕截图工具"></a>找一个好用的屏幕截图工具</h2><p>在写文章的时候，进行屏幕截图是经常会进行的操作，尤其是在写技术文章或者软件操作相关的文章时。</p><p>为了配合 Typora 使用，这个截图工具要可以将截的图保存入剪贴板，并且可以将截的图进行编辑后再放入剪贴板，因为经常要在截图上面划线画箭头画方框什么的。</p><p>我用的是 macOS 系统，一开始我尝试使用系统自带的截图工具，只要按下 <code>Command + Shift + 4</code> 或 <code>Command + Shift + 5</code> 就可以打开。这个工具可以截取全屏、窗口或任意区域，可以设置保存的位置，包含剪贴板，如果设置的位置不是剪贴板，在截图后会在屏幕右下角显示一个预览图，这个预览图可以直接拖拽到 Typora 中，或者点击预览图进行编辑，这些都挺不错的。</p><p>但是这个工具最大的问题是不支持将编辑过的图片保存到剪贴板，如果选择的保存位置是剪贴板，那么截图后不会弹出预览图，也就无法编辑。并且这个工具保存在磁盘上的截图文件名带有空格，有空格的文件名无法在 Markdown 中使用，必须对文件名进行修改，去除空格，很麻烦。</p><p>我现在暂时使用的是微信自带的截图工具，可以随心所欲截屏，然后编辑，编辑后能保存在剪贴板，就能直接粘贴进 Typora 了。我之前也看过别人用的一些功能强大的截图工具，有的工具可以将截图位置的英文变成中文，但我没有详细了解过，微信截图工具目前已经能满足我的需求。如果有朋友知道更好的截图工具，欢迎留言推荐一下。</p><h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>在我了解到本文介绍的这种插入图片方法之前，在文章中插入图片是一件很麻烦的事情，这很大影响了我的写作热情。现在有了好用的工具，情况就变得好多了。</p><p>写作是一个很好的习惯。而当找到一个顺手的工具时，能大大提高写作体验，让写作变成一件很愉悦的事情，这样能帮助你更好的坚持写作。</p>]]></content>
     
@@ -34,6 +34,12 @@
     
     
     
+    <category term="工具" scheme="https://liuduoios.github.io/categories/%E5%B7%A5%E5%85%B7/"/>
+    
+    
+    <category term="Markdown" scheme="https://liuduoios.github.io/tags/Markdown/"/>
+    
+    <category term="Hexo" scheme="https://liuduoios.github.io/tags/Hexo/"/>
     
   </entry>
   
