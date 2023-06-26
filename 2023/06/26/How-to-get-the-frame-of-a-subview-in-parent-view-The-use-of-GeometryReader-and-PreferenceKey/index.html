@@ -100,19 +100,21 @@
 
 
   
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Swift,SwiftUI," />
 
 
-<meta name="description" content="内联复合表达式12345UIView *view &#x3D; (&amp;#123;    UIView *v &#x3D; [[UIView alloc] init];    v.backgroundColor &#x3D; [UIColor whiteColor];    v;&amp;#125;);  在创建对象时，使用内联符合表达式是一个很好的技巧。例如在一个视图中创建并初始化很多子视图时，内联符合表达式可以使代码分块，结构上更清晰">
+<meta name="description" content="When developing using SwiftUI, there are situations where we need to get the frame of a subview in its ancestor view. For instance, I am currently working on a feature where upon long-pressing a butto">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Objective-C 奇葩写法合集">
-<meta property="og:url" content="https://liuduoios.github.io/weird_objectivec/index.html">
+<meta property="og:title" content="How to retrieve the frame of a subview in parent view: Leveraging GeometryReader and PreferenceKey">
+<meta property="og:url" content="https://liuduoios.github.io/2023/06/26/How-to-get-the-frame-of-a-subview-in-parent-view-The-use-of-GeometryReader-and-PreferenceKey/index.html">
 <meta property="og:site_name" content="My Knowledge Library">
-<meta property="og:description" content="内联复合表达式12345UIView *view &#x3D; (&amp;#123;    UIView *v &#x3D; [[UIView alloc] init];    v.backgroundColor &#x3D; [UIColor whiteColor];    v;&amp;#125;);  在创建对象时，使用内联符合表达式是一个很好的技巧。例如在一个视图中创建并初始化很多子视图时，内联符合表达式可以使代码分块，结构上更清晰">
+<meta property="og:description" content="When developing using SwiftUI, there are situations where we need to get the frame of a subview in its ancestor view. For instance, I am currently working on a feature where upon long-pressing a butto">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2017-12-05T07:49:37.000Z">
-<meta property="article:modified_time" content="2023-06-05T05:33:26.595Z">
+<meta property="article:published_time" content="2023-06-26T12:28:05.000Z">
+<meta property="article:modified_time" content="2023-06-26T13:27:58.655Z">
 <meta property="article:author" content="晨曦微光">
+<meta property="article:tag" content="Swift">
+<meta property="article:tag" content="SwiftUI">
 <meta name="twitter:card" content="summary">
 
 
@@ -122,7 +124,7 @@
 
 
 
-  <link rel="canonical" href="https://liuduoios.github.io/weird_objectivec/"/>
+  <link rel="canonical" href="https://liuduoios.github.io/2023/06/26/How-to-get-the-frame-of-a-subview-in-parent-view-The-use-of-GeometryReader-and-PreferenceKey/"/>
 
 
 
@@ -131,7 +133,7 @@
     sidebar: "",
   };
 </script>
-  <title>Objective-C 奇葩写法合集 | My Knowledge Library</title>
+  <title>How to retrieve the frame of a subview in parent view: Leveraging GeometryReader and PreferenceKey | My Knowledge Library</title>
   
 
 
@@ -278,7 +280,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/weird_objectivec/">
+    <link itemprop="mainEntityOfPage" href="https://liuduoios.github.io/2023/06/26/How-to-get-the-frame-of-a-subview-in-parent-view-The-use-of-GeometryReader-and-PreferenceKey/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -295,7 +297,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Objective-C 奇葩写法合集</h1>
+          <h1 class="post-title" itemprop="name headline">How to retrieve the frame of a subview in parent view: Leveraging GeometryReader and PreferenceKey</h1>
         
 
         <div class="post-meta">
@@ -307,7 +309,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-05T15:49:37+08:00">2017-12-05</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-06-26T20:28:05+08:00">2023-06-26</time>
             
 
             
@@ -328,7 +330,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Swift/" itemprop="url" rel="index"><span itemprop="name">Swift</span></a></span>
 
                 
                 
@@ -343,8 +345,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/weird_objectivec/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/weird_objectivec/" itemprop="commentCount"></span>
+                <a href="/2023/06/26/How-to-get-the-frame-of-a-subview-in-parent-view-The-use-of-GeometryReader-and-PreferenceKey/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2023/06/26/How-to-get-the-frame-of-a-subview-in-parent-view-The-use-of-GeometryReader-and-PreferenceKey/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -352,7 +354,7 @@
 
           
           
-             <span id="/weird_objectivec/" class="leancloud_visitors" data-flag-title="Objective-C 奇葩写法合集">
+             <span id="/2023/06/26/How-to-get-the-frame-of-a-subview-in-parent-view-The-use-of-GeometryReader-and-PreferenceKey/" class="leancloud_visitors" data-flag-title="How to retrieve the frame of a subview in parent view: Leveraging GeometryReader and PreferenceKey">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -382,7 +384,7 @@
                 
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
-                <span title="字数统计">7.1k</span>
+                <span title="字数统计">14k</span>
               
 
               
@@ -396,7 +398,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">7 mins.</span>
+                <span title="阅读时长">14 mins.</span>
               
             </div>
           
@@ -416,35 +418,41 @@
       
 
       
-        <h1 id="内联复合表达式"><a href="#内联复合表达式" class="headerlink" title="内联复合表达式"></a>内联复合表达式</h1><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UIView</span> *view = (&#123;</span><br><span class="line">    <span class="built_in">UIView</span> *v = [[<span class="built_in">UIView</span> alloc] init];</span><br><span class="line">    v.backgroundColor = [<span class="built_in">UIColor</span> whiteColor];</span><br><span class="line">    v;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+        <p>When developing using SwiftUI, there are situations where we need to get the frame of a subview in its ancestor view. For instance, I am currently working on a feature where upon long-pressing a button, the user can move their finger to a specific view in order to cancel a certain process, similar to voice input in WeChat.</p>
+<p>At this moment, it is essential to obtain the precise frame of a particular view to verify if the user’s finger is positioned on it.</p>
+<h2 id="GeometryReader"><a href="#GeometryReader" class="headerlink" title="GeometryReader"></a>GeometryReader</h2><p>To obtain the frame of a view, we can utilize the <code>GeometryReader</code> in SwiftUI. By wrapping a view with a GeometryReader, we can access its precise position and frame infomation.</p>
+<p>By incorporating a GeometryReader, we gain the ability to accurately determine the dimensions and location of a specific view.</p>
+<p>Look at the following code</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SomeView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>在创建对象时，使用内联符合表达式是一个很好的技巧。例如在一个视图中创建并初始化很多子视图时，内联符合表达式可以使代码分块，结构上更清晰。</p>
-<p>下面这种写法也是合法的：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(&#123;</span><br><span class="line">    <span class="built_in">UIView</span> *v = [[<span class="built_in">UIView</span> alloc] init];</span><br><span class="line">    v;</span><br><span class="line">&#125;).backgroundColor = [<span class="built_in">UIColor</span> whiteColor];</span><br></pre></td></tr></table></figure>
+<p>There are three ractangles. If we need to know the x, y, width, height of the middle one. We can put this rectangle inside a GeometryReader, like this:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SomeView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">            <span class="type">GeometryReader</span> &#123; geometry <span class="keyword">in</span></span><br><span class="line">                <span class="type">Rectangle</span>()</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="最短函数名"><a href="#最短函数名" class="headerlink" title="最短函数名"></a>最短函数名</h1><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-_ &#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">[<span class="keyword">self</span> _];</span><br></pre></td></tr></table></figure>
+<p>Then we can display the size on the rectangle using <code>overlay</code>.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SomeView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">            <span class="type">GeometryReader</span> &#123; geometry <span class="keyword">in</span></span><br><span class="line">                <span class="type">Rectangle</span>()</span><br><span class="line">                    .overlay(</span><br><span class="line">                        <span class="type">Text</span>(<span class="string">&quot;<span class="subst">\(geometry.size.width)</span> <span class="subst">\(geometry.size.height)</span>&quot;</span>)</span><br><span class="line">                            .foregroundColor(.white)</span><br><span class="line">                    )</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="结构体的初始化"><a href="#结构体的初始化" class="headerlink" title="结构体的初始化"></a>结构体的初始化</h1><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">CGRect</span> rect1 = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line"><span class="built_in">CGRect</span> rect2 = &#123;.origin.x=<span class="number">5</span>, .size=&#123;<span class="number">10</span>, <span class="number">10</span>&#125;&#125;; <span class="comment">// &#123;5, 0, 10, 10&#125;</span></span><br><span class="line"><span class="built_in">CGRect</span> rect3 = &#123;<span class="number">1</span>, <span class="number">2</span>&#125;; <span class="comment">// &#123;1, 2, 0, 0&#125;</span></span><br></pre></td></tr></table></figure>
+<p>Also the x, y position:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SomeView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">            <span class="type">GeometryReader</span> &#123; geometry <span class="keyword">in</span></span><br><span class="line">                <span class="type">Rectangle</span>()</span><br><span class="line">                    .overlay(</span><br><span class="line">                        <span class="type">Text</span>(<span class="string">&quot;<span class="subst">\(geometry.frame(in: .global).minX)</span> <span class="subst">\(geometry.frame(in: .global).minY)</span>&quot;</span>)</span><br><span class="line">                            .foregroundColor(.white)</span><br><span class="line">                    )</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="C-风格函数定义"><a href="#C-风格函数定义" class="headerlink" title="C 风格函数定义"></a>C 风格函数定义</h1><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> sum(a, b)</span><br><span class="line"><span class="type">int</span> a; <span class="type">int</span> b;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>We have got the exact postion and frame of the middle rectangle.</p>
+<p>But the data can only be used in the rectangle view. What if we want to use them in parent view?</p>
+<p>We need use the PreferenceKey to pass the infomation from inner to outside.</p>
+<h2 id="PreferenceKey"><a href="#PreferenceKey" class="headerlink" title="PreferenceKey"></a>PreferenceKey</h2><p>To use a preference key, we need to define a struct first.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">GeometryPreferenceKey</span>: <span class="title class_">PreferenceKey</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> defaultValue: <span class="type">CGRect</span> <span class="operator">=</span> .zero</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="数组下标初始化"><a href="#数组下标初始化" class="headerlink" title="数组下标初始化"></a>数组下标初始化</h1><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="type">int</span> numbers[] = &#123;</span><br><span class="line">    [<span class="number">1</span>] = <span class="number">66</span>,</span><br><span class="line">    [<span class="number">2</span>] = <span class="number">77</span>,</span><br><span class="line">    [<span class="number">3</span>] = <span class="number">88</span>,</span><br><span class="line">    [<span class="number">5</span>] = <span class="number">99</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// &#123;0, 66, 77, 88, 0, 99&#125;</span></span><br></pre></td></tr></table></figure>
+<p><code>PreferenceKey</code> is a protocol. To confirm this protocol, we need a <code>defaultValue</code> static property. We can designate the type of defaultValue by our demand. Here, I let it be CGRect and give it a default value <code>.zero</code>.</p>
+<p>Then, we must implement another method called <code>reduce</code>.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">GeometryPreferenceKey</span>: <span class="title class_">PreferenceKey</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> defaultValue: <span class="type">CGRect</span> <span class="operator">=</span> .zero</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">func</span> <span class="title function_">reduce</span>(<span class="params">value</span>: <span class="keyword">inout</span> <span class="type">CGRect</span>, <span class="params">nextValue</span>: () -&gt; <span class="type">CGRect</span>) &#123;</span><br><span class="line">        value <span class="operator">=</span> nextValue()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="字符行多行初始化"><a href="#字符行多行初始化" class="headerlink" title="字符行多行初始化"></a>字符行多行初始化</h1><p>也是很常用的技巧，可以让一个很长的字符串字面量通过换行达到提高可读性的效果。</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSString</span> *string = <span class="string">@&quot;apple&quot;</span></span><br><span class="line">                   <span class="string">@&quot;banana&quot;</span></span><br><span class="line">                   <span class="string">@&quot;orange&quot;</span></span><br><span class="line">                   <span class="string">@&quot;hello&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>This reduce method looks like the common reduce method in Swift standard library. It can be used to handle a initial value and a new value. Combine them by some means. Here, we just replace the old value with the new one. The first parameter value is an inout parameter.</p>
+<p>Then we can put the value into the preference by the custom key.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SomeView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> rectangleRect: <span class="type">CGRect</span> <span class="operator">=</span> .zero</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">            <span class="type">GeometryReader</span> &#123; geometry <span class="keyword">in</span></span><br><span class="line">                <span class="type">Rectangle</span>()</span><br><span class="line">                    .preference(key: <span class="type">GeometryPreferenceKey</span>.<span class="keyword">self</span>, value: geometry.frame(in: .global))</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">Rectangle</span>()</span><br><span class="line">        &#125;</span><br><span class="line">        .onPreferenceChange(<span class="type">GeometryPreferenceKey</span>.<span class="keyword">self</span>) &#123; value <span class="keyword">in</span></span><br><span class="line">            <span class="built_in">print</span>(value)</span><br><span class="line">            rectangleRect <span class="operator">=</span> value</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>效果等价于：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSString</span> *string = <span class="string">@&quot;applebananabughello&quot;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="的非主流用法"><a href="#的非主流用法" class="headerlink" title="?: 的非主流用法"></a>?: 的非主流用法</h1><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!block ?: block();</span><br></pre></td></tr></table></figure>
-
-<p>效果等价于：</p>
-<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (block) &#123;</span><br><span class="line">    block()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/27655570">https://www.zhihu.com/question/27655570</a></li>
-<li><a target="_blank" rel="noopener" href="http://blog.sunnyxx.com/2014/08/02/objc-weird-code/">http://blog.sunnyxx.com/2014/08/02/objc-weird-code/</a></li>
-</ul>
+<p>Give the rectangle a view modifier called <code>preference</code>, specify the key to <code>GeometryPreferenceKey.self</code> we just defined. Put the value we need into the value parameter.</p>
+<p>Then use <code>.onPreferenceChange</code> on the outside <code>VStack</code>, we can get the value here.</p>
+<p>We can print the value, or store it in a <code>@State</code> property.</p>
+<p>So we have got the data we need, we can use it to implement a lot of features.</p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>GeometryReader and PreferenceKey are incredibly useful features in SwiftUI. They provide powerful tools to address a wide range of challenges. It is essential to have a good understanding of these concepts as they can greatly enhance your SwiftUI development skills.</p>
 
       
     </div>
@@ -460,6 +468,14 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/Swift/" rel="tag"># Swift</a>
+          
+            <a href="/tags/SwiftUI/" rel="tag"># SwiftUI</a>
+          
+        </div>
+      
 
       
       
@@ -469,8 +485,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/Whats_new_in_swift_4_completely/" rel="next" title="最全的 Swift 4 新特性解析">
-                <i class="fa fa-chevron-left"></i> 最全的 Swift 4 新特性解析
+              <a href="/2023/06/08/%E7%94%A8-Hexo-%E5%86%99%E6%96%87%E7%AB%A0%E6%97%B6%E6%80%8E%E6%A0%B7%E6%84%89%E5%BF%AB%E5%9C%B0%E5%9C%A8-Markdown-%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/" rel="next" title="用 Hexo 写文章时怎样愉快地在 Markdown 中插入图片">
+                <i class="fa fa-chevron-left"></i> 用 Hexo 写文章时怎样愉快地在 Markdown 中插入图片
               </a>
             
           </div>
@@ -478,10 +494,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/docker-hexo/" rel="prev" title="用 Docker 搭建 Hexo 博客">
-                用 Docker 搭建 Hexo 博客 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -675,7 +687,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E8%81%94%E5%A4%8D%E5%90%88%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">内联复合表达式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%80%E7%9F%AD%E5%87%BD%E6%95%B0%E5%90%8D"><span class="nav-number">2.</span> <span class="nav-text">最短函数名</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">结构体的初始化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#C-%E9%A3%8E%E6%A0%BC%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89"><span class="nav-number">4.</span> <span class="nav-text">C 风格函数定义</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E4%B8%8B%E6%A0%87%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">数组下标初始化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E8%A1%8C%E5%A4%9A%E8%A1%8C%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">6.</span> <span class="nav-text">字符行多行初始化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9A%84%E9%9D%9E%E4%B8%BB%E6%B5%81%E7%94%A8%E6%B3%95"><span class="nav-number">7.</span> <span class="nav-text">?: 的非主流用法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#GeometryReader"><span class="nav-number">1.</span> <span class="nav-text">GeometryReader</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PreferenceKey"><span class="nav-number">2.</span> <span class="nav-text">PreferenceKey</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">3.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
             
 
           </div>
